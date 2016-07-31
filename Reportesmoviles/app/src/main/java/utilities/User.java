@@ -6,9 +6,9 @@ import java.io.Serializable;
  * Created by smartin on 27/06/2016.
  */
 public class User implements Serializable{
-    private String name,mail,password,phone,id,town,gender;
+    private String name,mail,password,phone,id,town,gender,image;
 
-    public User(String name, String mail, String password, String phone, String id, String town,String gender) {
+    public User(String name, String mail, String password, String phone, String id, String town,String gender,String image) {
         this.name = name;
         this.mail = mail;
         this.password = password;
@@ -16,6 +16,7 @@ public class User implements Serializable{
         this.id = id;
         this.town = town;
         this.gender = gender;
+        this.image = image;
     }
 
     public String getName() {
@@ -72,5 +73,13 @@ public class User implements Serializable{
 
     public void setGender(String gender) {
         this.gender = gender;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
     }
 }

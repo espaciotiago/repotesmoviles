@@ -4,12 +4,16 @@
     <group android:checkableBehavior="single">
         <item
             android:id="@+id/nav_profile"
-            android:icon="@drawable/ic_limpieza"
+            android:icon="@drawable/user"
             android:title="@string/my_profile" />
         <item
             android:id="@+id/nav_reports"
-            android:icon="@drawable/ic_alumbrado"
+            android:icon="@drawable/reports"
             android:title="@string/my_reports" />
+        <item
+            android:id="@+id/nav_new_report"
+            android:icon="@drawable/add"
+            android:title="@string/add_new_report" />
     </group>
 
     <item android:title="Filtros">

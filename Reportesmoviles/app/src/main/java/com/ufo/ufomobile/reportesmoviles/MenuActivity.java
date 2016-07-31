@@ -1,6 +1,7 @@
 package com.ufo.ufomobile.reportesmoviles;
 
 import android.Manifest;
+import android.app.Notification;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -17,6 +18,8 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -58,10 +61,9 @@ import java.util.Locale;
 import utilities.Report;
 
 public class MenuActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback {
+        implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback,
+        CategorySelectionDialogFragment.OnaAddSelected {
 
-    private static final long MIN_TIME_BW_UPDATES = 10;
-    private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 1000 * 60 * 1;
     int[] imageIDs = {
             R.drawable.alcantarillado,
             R.drawable.alumbrado,
@@ -103,6 +105,7 @@ public class MenuActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         //Gallery -----------------------------------------------------------------------------
+        /*
         gallery = (Gallery) findViewById(R.id.gallery);
         gallery.setAdapter(new ImageAdapter(this));
         gallery.setUnselectedAlpha(1.0f);
@@ -130,13 +133,12 @@ public class MenuActivity extends AppCompatActivity
         gallery.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Log.d("POSITION CLICK", position + "");
                 Intent goToReport = new Intent(MenuActivity.this, AddNewReportActivity.class);
                 goToReport.putExtra("category_icon", imageIDs[position % imageIDs.length]);
                 startActivity(goToReport);
-
             }
         });
+        */
 
         //Horizontal list -------------------------------------------------------------------------
         //----------------------------------------------------------------------------------------
@@ -183,8 +185,18 @@ public class MenuActivity extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_notifications) {
+            Intent goToNotification = new Intent(MenuActivity.this, NotificationsActivity.class);
+            startActivity(goToNotification);
             return true;
+        }
+        if(id == R.id.action_report){
+            CategorySelectionDialogFragment newFragment;
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            newFragment = new CategorySelectionDialogFragment();
+            FragmentTransaction transaction = fragmentManager.beginTransaction();
+            transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+            transaction.add(android.R.id.content, newFragment).addToBackStack(null).commit();
         }
 
         return super.onOptionsItemSelected(item);
@@ -267,7 +279,6 @@ public class MenuActivity extends AppCompatActivity
                     .target(latLng)
                     .zoom(13)
                     .bearing(0)
-                    .tilt(45)
                     .build();
             mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
 
@@ -348,6 +359,14 @@ public class MenuActivity extends AppCompatActivity
                 longitude = location.getLongitude();
             }
         }
+    }
+
+    @Override
+    public void onArticleSelectedListener(int resource, String name) {
+        Intent goToReport = new Intent(MenuActivity.this, AddNewReportActivity.class);
+        goToReport.putExtra("category_icon", resource);
+        goToReport.putExtra("category_name", name);
+        startActivity(goToReport);
     }
 
     //--------------------------------------------------------------------------------------------------------------

@@ -140,7 +140,7 @@ public class MenuActivity extends AppCompatActivity
 
         //Horizontal list -------------------------------------------------------------------------
         //----------------------------------------------------------------------------------------
-        List<Report> data = new ArrayList<>();
+        List<Report> data = new ArrayList<Report>();
         data.add(new Report("id123", "String title", "String description",
                 "String address", "String referencePoint", 0,
                 0, 0, Report.PUBLISHED, "String category", "hoy", null));

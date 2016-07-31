@@ -13,6 +13,7 @@ import android.location.Address;
 import android.location.Criteria;
 import android.location.Geocoder;
 import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
@@ -35,6 +36,7 @@ import android.widget.BaseAdapter;
 import android.widget.Gallery;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -56,8 +58,10 @@ import java.util.Locale;
 import utilities.Report;
 
 public class MenuActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener,OnMapReadyCallback {
+        implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback {
 
+    private static final long MIN_TIME_BW_UPDATES = 10;
+    private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 1000 * 60 * 1;
     int[] imageIDs = {
             R.drawable.alcantarillado,
             R.drawable.alumbrado,
@@ -67,9 +71,12 @@ public class MenuActivity extends AppCompatActivity
             R.drawable.gas,
     };
     private GoogleMap mMap;
-    View lastSelectedView=null;
+    View lastSelectedView = null;
     Gallery gallery;
     LinearLayoutManager layoutManager;
+    LocationManager locationManager;
+    double longitude,latitude=0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -99,7 +106,7 @@ public class MenuActivity extends AppCompatActivity
         gallery = (Gallery) findViewById(R.id.gallery);
         gallery.setAdapter(new ImageAdapter(this));
         gallery.setUnselectedAlpha(1.0f);
-        int selection=(int) (Integer.MAX_VALUE / 2) - ((Integer.MAX_VALUE / 2) % 6);
+        int selection = (int) (Integer.MAX_VALUE / 2) - ((Integer.MAX_VALUE / 2) % 6);
         gallery.setSelection((int) (Integer.MAX_VALUE / 2) - ((Integer.MAX_VALUE / 2) % imageIDs.length));
         gallery.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -109,7 +116,7 @@ public class MenuActivity extends AppCompatActivity
                 if (lastSelectedView != null) {
                     lastSelectedView.setLayoutParams(new Gallery.LayoutParams(130, 82));
                 }
-                if(view!=null) {
+                if (view != null) {
                     view.setLayoutParams(new Gallery.LayoutParams(130, 87));
                     lastSelectedView = view;
                 }
@@ -124,8 +131,8 @@ public class MenuActivity extends AppCompatActivity
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Log.d("POSITION CLICK", position + "");
-                Intent goToReport = new Intent(MenuActivity.this,AddNewReportActivity.class);
-                goToReport.putExtra("category_icon",imageIDs[position%imageIDs.length]);
+                Intent goToReport = new Intent(MenuActivity.this, AddNewReportActivity.class);
+                goToReport.putExtra("category_icon", imageIDs[position % imageIDs.length]);
                 startActivity(goToReport);
 
             }
@@ -134,15 +141,15 @@ public class MenuActivity extends AppCompatActivity
         //Horizontal list -------------------------------------------------------------------------
         //----------------------------------------------------------------------------------------
         List<Report> data = new ArrayList<>();
-        data.add(new Report("id123","String title", "String description",
+        data.add(new Report("id123", "String title", "String description",
                 "String address", "String referencePoint", 0,
-                0,0, Report.PUBLISHED, "String category","hoy",null));
-        data.add(new Report("id123","String title", "String description",
+                0, 0, Report.PUBLISHED, "String category", "hoy", null));
+        data.add(new Report("id123", "String title", "String description",
                 "String address", "String referencePoint", 0,
-                0,0, Report.IN_PROCESS, "String category","hoy",null));
-        data.add(new Report("id123","String title", "String description",
+                0, 0, Report.IN_PROCESS, "String category", "hoy", null));
+        data.add(new Report("id123", "String title", "String description",
                 "String address", "String referencePoint", 0,
-                0,0, Report.SOLVED, "String category","hoy",null));
+                0, 0, Report.SOLVED, "String category", "hoy", null));
         //----------------------------------------------------------------------------------------
         layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         RecyclerView myList = (RecyclerView) findViewById(R.id.my_recycler_view);
@@ -222,73 +229,76 @@ public class MenuActivity extends AppCompatActivity
             return;
         }
         mMap.setMyLocationEnabled(true);
+        /*
         LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         Criteria criteria = new Criteria();
         String bestProvider = locationManager.getBestProvider(criteria, true);
         Location location = locationManager.getLastKnownLocation(bestProvider);
-        double latitude = location.getLatitude();
-        double longitude = location.getLongitude();
+            double latitude = location.getLatitude();
+            double longitude = location.getLongitude();
+            LatLng latLng = new LatLng(latitude, longitude);
+        */
+        find_Location(getApplicationContext());
         LatLng latLng = new LatLng(latitude, longitude);
+            // Add a marker in Sydney and move the camera
+            LatLng sydney = new LatLng(latitude - 0.01, longitude - 0.01);
+            LatLng sydney2 = new LatLng(latitude + 0.01, longitude - 0.01);
+            LatLng sydney3 = new LatLng(latitude - 0.01, longitude + 0.01);
 
-        // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(latitude-0.01, longitude-0.01);
-        LatLng sydney2 = new LatLng(latitude+0.01, longitude-0.01);
-        LatLng sydney3 = new LatLng(latitude-0.01, longitude+0.01);
+            Bitmap b1 = drawableToBitmap(getResources().getDrawable(R.drawable.alcantarillado));
+            Bitmap bhalfsize1 = Bitmap.createScaledBitmap(b1, b1.getWidth() / 4, b1.getHeight() / 4, false);
+            mMap.addMarker(new MarkerOptions().position(sydney)
+                    .title("Marker in Sydney")
+                    .icon(BitmapDescriptorFactory.fromBitmap(bhalfsize1)));
 
-        Bitmap b1 = drawableToBitmap(getResources().getDrawable(R.drawable.alcantarillado));
-        Bitmap bhalfsize1=Bitmap.createScaledBitmap(b1, b1.getWidth() / 4, b1.getHeight() / 4, false);
-        mMap.addMarker(new MarkerOptions().position(sydney)
-                .title("Marker in Sydney")
-                .icon(BitmapDescriptorFactory.fromBitmap(bhalfsize1)));
+            Bitmap b2 = drawableToBitmap(getResources().getDrawable(R.drawable.alumbrado));
+            Bitmap bhalfsize2 = Bitmap.createScaledBitmap(b2, b2.getWidth() / 4, b2.getHeight() / 4, false);
+            mMap.addMarker(new MarkerOptions().position(sydney2)
+                    .title("Marker in Sydney2")
+                    .icon(BitmapDescriptorFactory.fromBitmap(bhalfsize2)));
 
-        Bitmap b2 = drawableToBitmap(getResources().getDrawable(R.drawable.alumbrado));
-        Bitmap bhalfsize2=Bitmap.createScaledBitmap(b2, b2.getWidth() / 4, b2.getHeight() / 4, false);
-        mMap.addMarker(new MarkerOptions().position(sydney2)
-                .title("Marker in Sydney2")
-                .icon(BitmapDescriptorFactory.fromBitmap(bhalfsize2)));
+            Bitmap b = drawableToBitmap(getResources().getDrawable(R.drawable.acueducto));
+            Bitmap bhalfsize = Bitmap.createScaledBitmap(b, b.getWidth() / 4, b.getHeight() / 4, false);
+            mMap.addMarker(new MarkerOptions().position(sydney3)
+                    .title("Marker in Sydney3")
+                    .icon(BitmapDescriptorFactory.fromBitmap(bhalfsize)));
 
-        Bitmap b = drawableToBitmap(getResources().getDrawable(R.drawable.acueducto));
-        Bitmap bhalfsize=Bitmap.createScaledBitmap(b, b.getWidth() / 4, b.getHeight() / 4, false);
-        mMap.addMarker(new MarkerOptions().position(sydney3)
-                .title("Marker in Sydney3")
-                .icon(BitmapDescriptorFactory.fromBitmap(bhalfsize)));
+            CameraPosition cameraPosition = new CameraPosition.Builder()
+                    .target(latLng)
+                    .zoom(13)
+                    .bearing(0)
+                    .tilt(45)
+                    .build();
+            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
 
-        CameraPosition cameraPosition = new CameraPosition.Builder()
-                .target(latLng)
-                .zoom(13)
-                .bearing(0)
-                .tilt(45)
-                .build();
-        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-
-        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-            @Override
-            public boolean onMarkerClick(Marker marker) {
-                String tit = marker.getTitle();
-                if (tit.equals("Marker in Sydney")) {
-                    layoutManager.scrollToPositionWithOffset(0, 20);
-                } else if (tit.equals("Marker in Sydney2")) {
-                    layoutManager.scrollToPositionWithOffset(1, 20);
-                } else if (tit.equals("Marker in Sydney3")) {
-                    layoutManager.scrollToPositionWithOffset(2, 20);
+            mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+                @Override
+                public boolean onMarkerClick(Marker marker) {
+                    String tit = marker.getTitle();
+                    if (tit.equals("Marker in Sydney")) {
+                        layoutManager.scrollToPositionWithOffset(0, 20);
+                    } else if (tit.equals("Marker in Sydney2")) {
+                        layoutManager.scrollToPositionWithOffset(1, 20);
+                    } else if (tit.equals("Marker in Sydney3")) {
+                        layoutManager.scrollToPositionWithOffset(2, 20);
+                    }
+                    return false;
                 }
-                return false;
-            }
-        });
+            });
     }
 
 
-    public static Bitmap drawableToBitmap (Drawable drawable) {
+    public static Bitmap drawableToBitmap(Drawable drawable) {
         Bitmap bitmap = null;
 
         if (drawable instanceof BitmapDrawable) {
             BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
-            if(bitmapDrawable.getBitmap() != null) {
+            if (bitmapDrawable.getBitmap() != null) {
                 return bitmapDrawable.getBitmap();
             }
         }
 
-        if(drawable.getIntrinsicWidth() <= 0 || drawable.getIntrinsicHeight() <= 0) {
+        if (drawable.getIntrinsicWidth() <= 0 || drawable.getIntrinsicHeight() <= 0) {
             bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888); // Single color bitmap will be created of 1x1 pixel
         } else {
             bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
@@ -300,7 +310,45 @@ public class MenuActivity extends AppCompatActivity
         return bitmap;
     }
 
+    public void find_Location(Context con) {
+        Log.d("Find Location", "in find_location");
+        String location_context = Context.LOCATION_SERVICE;
+        locationManager = (LocationManager) con.getSystemService(location_context);
+        List<String> providers = locationManager.getProviders(true);
+        for (String provider : providers) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                return;
+            }
+            locationManager.requestLocationUpdates(provider, 1000, 0,
+                    new LocationListener() {
 
+                        public void onLocationChanged(Location location) {
+                        }
+
+                        public void onProviderDisabled(String provider) {
+                        }
+
+                        public void onProviderEnabled(String provider) {
+                        }
+
+                        public void onStatusChanged(String provider, int status,
+                                                    Bundle extras) {
+                        }
+                    });
+            Location location = locationManager.getLastKnownLocation(provider);
+            if (location != null) {
+                latitude = location.getLatitude();
+                longitude = location.getLongitude();
+            }
+        }
+    }
 
     //--------------------------------------------------------------------------------------------------------------
     //IMAGE ADAPTER FOR GALLERY

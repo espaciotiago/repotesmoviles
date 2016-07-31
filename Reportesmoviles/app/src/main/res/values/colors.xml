@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#2F3191</color>
+    <color name="colorPrimaryDark">#27286E</color>
+    <color name="colorAccent">#03a9f4</color>
+    <color name="colorAccentDark">#0884BE</color>
+    <color name="colorAccentRed">#ED3237</color>
+    <color name="colorAccentRedDark">#B2252A</color>
+    <color name="colorPublished">#2F3191</color>
+    <color name="colorSolved">#1BCC45</color>
+    <color name="colorInPorcess">#FF7800</color>
+    <color name="colorNotification">#EFC618</color>
+</resources>

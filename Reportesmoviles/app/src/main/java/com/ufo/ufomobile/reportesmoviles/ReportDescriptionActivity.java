@@ -39,7 +39,7 @@ public class ReportDescriptionActivity extends AppCompatActivity {
 
         //Horizontal list -------------------------------------------------------------------------
         //----------------------------------------------------------------------------------------
-        data = new ArrayList<>();
+        data = new ArrayList<Bitmap>();
         data.add(null);
         //----------------------------------------------------------------------------------------
         LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);

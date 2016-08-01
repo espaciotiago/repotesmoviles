@@ -11,12 +11,13 @@ public class Report implements Serializable{
     public final static String SOLVED="Solucionado";
 
     private String id,title,description,address,referencePoint,state,category,date;
-    private int latitude,longitude,supports;
+    private int supports;
+    private double latitude,longitude;
     private String[] images;
 
     public Report(String id, String title, String description,
-                  String address, String referencePoint, int latitude,int supports,
-                  int longitude, String state, String category,String date,String[] images) {
+                  String address, String referencePoint, double latitude,int supports,
+                  double longitude, String state, String category,String date,String[] images) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -71,19 +72,19 @@ public class Report implements Serializable{
         this.referencePoint = referencePoint;
     }
 
-    public int getLatitude() {
+    public double getLatitude() {
         return latitude;
     }
 
-    public void setLatitude(int latitude) {
+    public void setLatitude(double latitude) {
         this.latitude = latitude;
     }
 
-    public int getLongitude() {
+    public double getLongitude() {
         return longitude;
     }
 
-    public void setLongitude(int longitude) {
+    public void setLongitude(double longitude) {
         this.longitude = longitude;
     }
 

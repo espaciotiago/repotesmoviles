@@ -151,11 +151,27 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
 
-                    <Spinner
+                    <LinearLayout
+                        android:orientation="horizontal"
                         android:layout_width="match_parent"
-                        android:layout_height="46dp"
-                        android:id="@+id/genderr"
-                        android:gravity="center_vertical" />
+                        android:layout_height="46dp">
+
+                        <CheckBox
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/male"
+                            android:id="@+id/checkBox"
+                            android:textColor="@android:color/darker_gray"
+                            android:checked="false" />
+
+                        <CheckBox
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/female"
+                            android:id="@+id/checkBox2"
+                            android:textColor="@android:color/darker_gray"
+                            android:checked="false" />
+                    </LinearLayout>
 
                     <View
                         android:layout_width="match_parent"

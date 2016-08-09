@@ -9,6 +9,8 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -20,6 +22,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -39,6 +42,7 @@ public class AddNewReportActivity extends AppCompatActivity {
     private ImageView categoryImg;
     private EditText title,description,address,referencePoint;
     private ScrollView scrollView;
+    private ImageButton mapview;
     Recycler_View_Adapter adapter;
     List<Bitmap> data;
 
@@ -52,6 +56,19 @@ public class AddNewReportActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         scrollView=(ScrollView)findViewById(R.id.scrollView);
+
+        mapview = (ImageButton)findViewById(R.id.mapview);
+        mapview.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                AddressPickerDialogFragment newFragment;
+                FragmentManager fragmentManager = getSupportFragmentManager();
+                newFragment = new AddressPickerDialogFragment();
+                FragmentTransaction transaction = fragmentManager.beginTransaction();
+                transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                transaction.add(android.R.id.content, newFragment).addToBackStack(null).commit();
+            }
+        });
 
         categoryResource = getIntent().getIntExtra("category_icon",0);
         categoryImg=(ImageView)findViewById(R.id.category__img);

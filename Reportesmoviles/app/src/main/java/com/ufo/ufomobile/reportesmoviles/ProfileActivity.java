@@ -27,7 +27,11 @@ public class ProfileActivity extends AppCompatActivity {
         final Drawable upArrow = getResources().getDrawable(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
         upArrow.setColorFilter(getResources().getColor(R.color.colorAccent), PorterDuff.Mode.SRC_ATOP);
         getSupportActionBar().setHomeAsUpIndicator(upArrow);
+<<<<<<< HEAD
         //----------------------------------------------------------------------------------------------
+=======
+        //--------------------------------------------------------------------------------------------
+>>>>>>> master
 
     }
 

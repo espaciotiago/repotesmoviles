@@ -51,6 +51,7 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.StreetViewPanoramaCamera;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -78,6 +79,7 @@ public class MenuActivity extends AppCompatActivity
     LinearLayoutManager layoutManager;
     LocationManager locationManager;
     double longitude,latitude=0;
+    List<Report> data;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -142,16 +144,16 @@ public class MenuActivity extends AppCompatActivity
 
         //Horizontal list -------------------------------------------------------------------------
         //----------------------------------------------------------------------------------------
-        List<Report> data = new ArrayList<Report>();
+        data = new ArrayList<Report>();
         data.add(new Report("id123", "String title", "String description",
                 "String address", "String referencePoint", 0,
-                0, 0, Report.PUBLISHED, "String category", "hoy", null));
-        data.add(new Report("id123", "String title", "String description",
+                0, 0, Report.PUBLISHED, "Acueducto y alcantarillado", "hoy", null));
+        data.add(new Report("id124", "String title", "String description",
                 "String address", "String referencePoint", 0,
-                0, 0, Report.IN_PROCESS, "String category", "hoy", null));
-        data.add(new Report("id123", "String title", "String description",
+                0, 0, Report.IN_PROCESS, "Estado de las vias", "hoy", null));
+        data.add(new Report("id125", "String title", "String description",
                 "String address", "String referencePoint", 0,
-                0, 0, Report.SOLVED, "String category", "hoy", null));
+                0, 0, Report.SOLVED, "Basura", "hoy", null));
         //----------------------------------------------------------------------------------------
         layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         RecyclerView myList = (RecyclerView) findViewById(R.id.my_recycler_view);
@@ -267,17 +269,83 @@ public class MenuActivity extends AppCompatActivity
         */
         find_Location(getApplicationContext());
         LatLng latLng = new LatLng(latitude, longitude);
+        String[] categories=getResources().getStringArray(R.array.categories);
             // Add a marker in Sydney and move the camera
             LatLng sydney = new LatLng(latitude - 0.01, longitude - 0.01);
             LatLng sydney2 = new LatLng(latitude + 0.01, longitude - 0.01);
             LatLng sydney3 = new LatLng(latitude - 0.01, longitude + 0.01);
 
+
+            for(int i = 0; i<data.size(); i++){
+                Report rep = data.get(i);
+                String category = rep.getCategory();
+                double lat=rep.getLatitude();
+                double lon=rep.getLongitude();
+
+                if(category.equals(categories[0])){
+                    Bitmap b1 = drawableToBitmap(getResources().getDrawable(imageIDs[0]));
+                    Bitmap bhalfsize1 = Bitmap.createScaledBitmap(b1, b1.getWidth() / 4, b1.getHeight() / 4, false);
+
+                    mMap.addMarker(new MarkerOptions().position(sydney)
+                            .title(rep.getId())
+                            .snippet(rep.getTitle())
+                            .icon(BitmapDescriptorFactory.fromBitmap(bhalfsize1)));
+
+                }else if(category.equals(categories[1])){
+                    Bitmap b1 = drawableToBitmap(getResources().getDrawable(imageIDs[1]));
+                    Bitmap bhalfsize1 = Bitmap.createScaledBitmap(b1, b1.getWidth() / 4, b1.getHeight() / 4, false);
+
+                    mMap.addMarker(new MarkerOptions().position(sydney2)
+                            .title(rep.getId())
+                            .snippet(rep.getTitle())
+                            .icon(BitmapDescriptorFactory.fromBitmap(bhalfsize1)));
+
+                }else if(category.equals(categories[2])){
+                    Bitmap b1 = drawableToBitmap(getResources().getDrawable(imageIDs[2]));
+                    Bitmap bhalfsize1 = Bitmap.createScaledBitmap(b1, b1.getWidth() / 4, b1.getHeight() / 4, false);
+
+                    mMap.addMarker(new MarkerOptions().position(sydney3)
+                            .title(rep.getId())
+                            .snippet(rep.getTitle())
+                            .icon(BitmapDescriptorFactory.fromBitmap(bhalfsize1)));
+
+                }else if(category.equals(categories[3])){
+                    Bitmap b1 = drawableToBitmap(getResources().getDrawable(imageIDs[3]));
+                    Bitmap bhalfsize1 = Bitmap.createScaledBitmap(b1, b1.getWidth() / 4, b1.getHeight() / 4, false);
+
+                    mMap.addMarker(new MarkerOptions().position(sydney)
+                            .title(rep.getId())
+                            .snippet(rep.getTitle())
+                            .icon(BitmapDescriptorFactory.fromBitmap(bhalfsize1)));
+
+                }else if(category.equals(categories[4])){
+                    Bitmap b1 = drawableToBitmap(getResources().getDrawable(imageIDs[4]));
+                    Bitmap bhalfsize1 = Bitmap.createScaledBitmap(b1, b1.getWidth() / 4, b1.getHeight() / 4, false);
+
+                    mMap.addMarker(new MarkerOptions().position(sydney)
+                            .title(rep.getId())
+                            .snippet(rep.getTitle())
+                            .icon(BitmapDescriptorFactory.fromBitmap(bhalfsize1)));
+
+                }else if(category.equals(categories[5])){
+                    Bitmap b1 = drawableToBitmap(getResources().getDrawable(imageIDs[5]));
+                    Bitmap bhalfsize1 = Bitmap.createScaledBitmap(b1, b1.getWidth() / 4, b1.getHeight() / 4, false);
+
+                    mMap.addMarker(new MarkerOptions().position(sydney)
+                            .title(rep.getId())
+                            .snippet(rep.getTitle())
+                            .icon(BitmapDescriptorFactory.fromBitmap(bhalfsize1)));
+
+                }
+            }
+
+        /*
             Bitmap b1 = drawableToBitmap(getResources().getDrawable(R.drawable.alcantarillado));
             Bitmap bhalfsize1 = Bitmap.createScaledBitmap(b1, b1.getWidth() / 4, b1.getHeight() / 4, false);
             mMap.addMarker(new MarkerOptions().position(sydney)
                     .title("Marker in Sydney")
                     .icon(BitmapDescriptorFactory.fromBitmap(bhalfsize1)));
-
+        */
             Bitmap b2 = drawableToBitmap(getResources().getDrawable(R.drawable.alumbrado));
             Bitmap bhalfsize2 = Bitmap.createScaledBitmap(b2, b2.getWidth() / 4, b2.getHeight() / 4, false);
             mMap.addMarker(new MarkerOptions().position(sydney2)
@@ -300,7 +368,14 @@ public class MenuActivity extends AppCompatActivity
             mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
                 @Override
                 public boolean onMarkerClick(Marker marker) {
-                    String tit = marker.getTitle();
+                    String id = marker.getTitle();
+                    for (int i =0; i < data.size(); i++){
+                        String reprId = data.get(i).getId();
+                        if(id.equals(reprId)){
+                            layoutManager.scrollToPositionWithOffset(i, 20);
+                        }
+                    }
+/*
                     if (tit.equals("Marker in Sydney")) {
                         layoutManager.scrollToPositionWithOffset(0, 20);
                     } else if (tit.equals("Marker in Sydney2")) {
@@ -308,6 +383,7 @@ public class MenuActivity extends AppCompatActivity
                     } else if (tit.equals("Marker in Sydney3")) {
                         layoutManager.scrollToPositionWithOffset(2, 20);
                     }
+                    */
                     return false;
                 }
             });
@@ -469,8 +545,9 @@ public class MenuActivity extends AppCompatActivity
         @Override
         public void onBindViewHolder(View_Holder holder, final int position) {
 
-            String state=list.get(position).getState();
+            String state=list.get(position).getStatus();
             String category=list.get(position).getCategory();
+            String[] categories=getResources().getStringArray(R.array.categories);
 
             //Use the provided View Holder on the onCreateViewHolder method to populate the current row on the RecyclerView
             holder.title.setText(list.get(position).getTitle());
@@ -483,6 +560,21 @@ public class MenuActivity extends AppCompatActivity
             }else{
                 holder.state.setTextColor(getResources().getColor(R.color.colorSolved));
             }
+
+            if(category.equals(categories[0])){
+                holder.category_img.setImageResource(imageIDs[0]);
+            }else if(category.equals(categories[1])){
+                holder.category_img.setImageResource(imageIDs[1]);
+            }else if(category.equals(categories[2])){
+                holder.category_img.setImageResource(imageIDs[2]);
+            }else if(category.equals(categories[3])){
+                holder.category_img.setImageResource(imageIDs[3]);
+            }else if(category.equals(categories[4])){
+                holder.category_img.setImageResource(imageIDs[4]);
+            }else if(category.equals(categories[5])){
+                holder.category_img.setImageResource(imageIDs[5]);
+            }
+
             holder.more.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -528,6 +620,7 @@ public class MenuActivity extends AppCompatActivity
     public class View_Holder extends RecyclerView.ViewHolder {
 
         TextView title,description,state,more;
+        ImageView category_img;
 
         View_Holder(View itemView) {
             super(itemView);
@@ -535,6 +628,7 @@ public class MenuActivity extends AppCompatActivity
             description = (TextView) itemView.findViewById(R.id.description);
             state = (TextView) itemView.findViewById(R.id.state);
             more = (TextView) itemView.findViewById(R.id.more);
+            category_img = (ImageView) itemView.findViewById(R.id.category_img);
         }
     }
 }

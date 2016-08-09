@@ -207,6 +207,21 @@ public class MenuActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
+
+        if(id==R.id.nav_new_report){
+            CategorySelectionDialogFragment newFragment;
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            newFragment = new CategorySelectionDialogFragment();
+            FragmentTransaction transaction = fragmentManager.beginTransaction();
+            transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+            transaction.add(android.R.id.content, newFragment).addToBackStack(null).commit();
+        }else if(id==R.id.nav_profile){
+            Intent goToProfile = new Intent(MenuActivity.this, ProfileActivity.class);
+            startActivity(goToProfile);
+        }else if(id==R.id.nav_close){
+
+        }
+
 /*
         if (id == R.id.nav_camera) {
             // Handle the camera action

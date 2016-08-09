@@ -6,6 +6,7 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="action_notification">Notificaciones</string>
     <string name="action_report">Reportar</string>
+    <string name="action_edit">Editar perfil</string>
 
     <string name="new_report">PRESIONE EL ICONO PARA REPORTAR</string>
     <string name="add_new_report">Reportar</string>
@@ -74,5 +75,6 @@
     <string name="title_activity_initial">InitialActivity</string>
     <string name="title_activity_login">Inicio de sesion</string>
     <string name="title_activity_sign_up">SignUpActivity</string>
+    <string name="title_activity_profile">ProfileActivity</string>
 
 </resources>

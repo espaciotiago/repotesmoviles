@@ -1,6 +1,7 @@
 package utilities;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
 /**
  * Created by smartin on 27/06/2016.
@@ -13,11 +14,11 @@ public class Report implements Serializable{
     private String id,title,description,address,referencePoint,status,category,date;
     private int supports;
     private double latitude,longitude;
-    private String[] images;
+    private ArrayList<String> images;
 
     public Report(String id, String title, String description,
                   String address, String referencePoint, double latitude,int supports,
-                  double longitude, String status, String category,String date,String[] images) {
+                  double longitude, String status, String category,String date,ArrayList<String>  images) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -104,11 +105,11 @@ public class Report implements Serializable{
         this.category = category;
     }
 
-    public String[] getImages() {
+    public ArrayList<String>  getImages() {
         return images;
     }
 
-    public void setImages(String[] images) {
+    public void setImages(ArrayList<String>  images) {
         this.images = images;
     }
 

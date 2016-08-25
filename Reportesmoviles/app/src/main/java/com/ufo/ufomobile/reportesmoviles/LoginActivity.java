@@ -15,10 +15,14 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import utilities.DBHelper;
+import utilities.User;
+
 public class LoginActivity extends AppCompatActivity {
     private EditText mail,password;
     private TextView signup;
     private Button login;
+    DBHelper db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +36,8 @@ public class LoginActivity extends AppCompatActivity {
         upArrow.setColorFilter(getResources().getColor(R.color.colorAccent), PorterDuff.Mode.SRC_ATOP);
         getSupportActionBar().setHomeAsUpIndicator(upArrow);
         //--------------------------------------------------------------------------------------------
+        db=new DBHelper(this);
+
         mail=(EditText)findViewById(R.id.mail);
         password=(EditText)findViewById(R.id.password);
         login=(Button)findViewById(R.id.login);
@@ -41,14 +47,18 @@ public class LoginActivity extends AppCompatActivity {
                 String mai=mail.getText().toString();
                 String pass=password.getText().toString();
                 if(!mai.equals("") && !pass.equals("")){
-                    //Autenticate user
+                    //TO DO Autenticate user http
+                    User u = new User("Santiago Moreno Benavides","msantim@hotmail.com",
+                                        "santiago29","3016929622","1144072657","Cali-Colombia",
+                                        "Masculino","");
+                    db.createUser(u);
+                    Intent goToMenu = new Intent(LoginActivity.this,MenuActivity.class);
+                    startActivity(goToMenu);
+                    finish();
                 }else{
                     String incompleteInfoError=getResources().getString(R.string.incomplete_info_error);
                     Toast.makeText(getApplicationContext(),incompleteInfoError,Toast.LENGTH_SHORT).show();
                 }
-                Intent goToMenu = new Intent(LoginActivity.this,MenuActivity.class);
-                startActivity(goToMenu);
-                finish();
             }
         });
 

@@ -2,6 +2,7 @@ package com.ufo.ufomobile.reportesmoviles;
 
 import android.Manifest;
 import android.app.Notification;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -16,6 +17,7 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
@@ -59,7 +61,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
+import utilities.DBHelper;
 import utilities.Report;
+import utilities.User;
 
 public class MenuActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback,
@@ -80,6 +84,8 @@ public class MenuActivity extends AppCompatActivity
     LocationManager locationManager;
     double longitude,latitude=0;
     List<Report> data;
+    DBHelper db;
+    User user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,6 +96,9 @@ public class MenuActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        //Database ----------------------------------------------------------------------------
+        db=new DBHelper(this);
+        user = db.userExists();
         //Map ---------------------------------------------------------------------------------
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -142,24 +151,28 @@ public class MenuActivity extends AppCompatActivity
         });
         */
 
-        //Horizontal list -------------------------------------------------------------------------
-        //----------------------------------------------------------------------------------------
+        //Horizontal list --------------------------------------------------------------------------
+        //------------------------------------------------------------------------------------------
         data = new ArrayList<Report>();
+        /*
         data.add(new Report("id123", "String title", "String description",
-                "String address", "String referencePoint", 0,
-                0, 0, Report.PUBLISHED, "Acueducto y alcantarillado", "hoy", null));
+                "String address", "String referencePoint", 3.391318,
+                0, -76.5238619, Report.PUBLISHED, "Acueducto y alcantarillado", "hoy", null));
         data.add(new Report("id124", "String title", "String description",
-                "String address", "String referencePoint", 0,
-                0, 0, Report.IN_PROCESS, "Estado de las vias", "hoy", null));
+                "String address", "String referencePoint", 3.391318,
+                0, -76.54386190000001, Report.IN_PROCESS, "Estado de las vias", "hoy", null));
         data.add(new Report("id125", "String title", "String description",
-                "String address", "String referencePoint", 0,
-                0, 0, Report.SOLVED, "Basura", "hoy", null));
-        //----------------------------------------------------------------------------------------
+                "String address", "String referencePoint", 3.4113179999999996,
+                0, -76.54386190000001, Report.SOLVED, "Basura", "hoy", null));
+
+        //------------------------------------------------------------------------------------------
         layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         RecyclerView myList = (RecyclerView) findViewById(R.id.my_recycler_view);
         Recycler_View_Adapter adapter = new Recycler_View_Adapter(data, getApplication());
         myList.setAdapter(adapter);
         myList.setLayoutManager(layoutManager);
+        */
+        //------------------------------------------------------------------------------------------
     }
 
     @Override
@@ -220,9 +233,17 @@ public class MenuActivity extends AppCompatActivity
         }else if(id==R.id.nav_profile){
             Intent goToProfile = new Intent(MenuActivity.this, ProfileActivity.class);
             startActivity(goToProfile);
+        }else if(id==R.id.nav_reports){
+            Intent goToNotification = new Intent(MenuActivity.this, NotificationsActivity.class);
+            startActivity(goToNotification);
         }else if(id==R.id.nav_close){
-
+            db.deleteUser();
+            Intent goToLogin = new Intent(MenuActivity.this, LoginActivity.class);
+            startActivity(goToLogin);
+            finish();
         }
+
+        //Filtros
 
 /*
         if (id == R.id.nav_camera) {
@@ -269,83 +290,13 @@ public class MenuActivity extends AppCompatActivity
         */
         find_Location(getApplicationContext());
         LatLng latLng = new LatLng(latitude, longitude);
-        String[] categories=getResources().getStringArray(R.array.categories);
-            // Add a marker in Sydney and move the camera
-            LatLng sydney = new LatLng(latitude - 0.01, longitude - 0.01);
-            LatLng sydney2 = new LatLng(latitude + 0.01, longitude - 0.01);
-            LatLng sydney3 = new LatLng(latitude - 0.01, longitude + 0.01);
-
-
-            for(int i = 0; i<data.size(); i++){
-                Report rep = data.get(i);
-                String category = rep.getCategory();
-                double lat=rep.getLatitude();
-                double lon=rep.getLongitude();
-
-                if(category.equals(categories[0])){
-                    Bitmap b1 = drawableToBitmap(getResources().getDrawable(imageIDs[0]));
-                    Bitmap bhalfsize1 = Bitmap.createScaledBitmap(b1, b1.getWidth() / 4, b1.getHeight() / 4, false);
-
-                    mMap.addMarker(new MarkerOptions().position(sydney)
-                            .title(rep.getId())
-                            .snippet(rep.getTitle())
-                            .icon(BitmapDescriptorFactory.fromBitmap(bhalfsize1)));
-
-                }else if(category.equals(categories[1])){
-                    Bitmap b1 = drawableToBitmap(getResources().getDrawable(imageIDs[1]));
-                    Bitmap bhalfsize1 = Bitmap.createScaledBitmap(b1, b1.getWidth() / 4, b1.getHeight() / 4, false);
-
-                    mMap.addMarker(new MarkerOptions().position(sydney2)
-                            .title(rep.getId())
-                            .snippet(rep.getTitle())
-                            .icon(BitmapDescriptorFactory.fromBitmap(bhalfsize1)));
-
-                }else if(category.equals(categories[2])){
-                    Bitmap b1 = drawableToBitmap(getResources().getDrawable(imageIDs[2]));
-                    Bitmap bhalfsize1 = Bitmap.createScaledBitmap(b1, b1.getWidth() / 4, b1.getHeight() / 4, false);
-
-                    mMap.addMarker(new MarkerOptions().position(sydney3)
-                            .title(rep.getId())
-                            .snippet(rep.getTitle())
-                            .icon(BitmapDescriptorFactory.fromBitmap(bhalfsize1)));
-
-                }else if(category.equals(categories[3])){
-                    Bitmap b1 = drawableToBitmap(getResources().getDrawable(imageIDs[3]));
-                    Bitmap bhalfsize1 = Bitmap.createScaledBitmap(b1, b1.getWidth() / 4, b1.getHeight() / 4, false);
-
-                    mMap.addMarker(new MarkerOptions().position(sydney)
-                            .title(rep.getId())
-                            .snippet(rep.getTitle())
-                            .icon(BitmapDescriptorFactory.fromBitmap(bhalfsize1)));
-
-                }else if(category.equals(categories[4])){
-                    Bitmap b1 = drawableToBitmap(getResources().getDrawable(imageIDs[4]));
-                    Bitmap bhalfsize1 = Bitmap.createScaledBitmap(b1, b1.getWidth() / 4, b1.getHeight() / 4, false);
-
-                    mMap.addMarker(new MarkerOptions().position(sydney)
-                            .title(rep.getId())
-                            .snippet(rep.getTitle())
-                            .icon(BitmapDescriptorFactory.fromBitmap(bhalfsize1)));
-
-                }else if(category.equals(categories[5])){
-                    Bitmap b1 = drawableToBitmap(getResources().getDrawable(imageIDs[5]));
-                    Bitmap bhalfsize1 = Bitmap.createScaledBitmap(b1, b1.getWidth() / 4, b1.getHeight() / 4, false);
-
-                    mMap.addMarker(new MarkerOptions().position(sydney)
-                            .title(rep.getId())
-                            .snippet(rep.getTitle())
-                            .icon(BitmapDescriptorFactory.fromBitmap(bhalfsize1)));
-
-                }
-            }
-
         /*
             Bitmap b1 = drawableToBitmap(getResources().getDrawable(R.drawable.alcantarillado));
             Bitmap bhalfsize1 = Bitmap.createScaledBitmap(b1, b1.getWidth() / 4, b1.getHeight() / 4, false);
             mMap.addMarker(new MarkerOptions().position(sydney)
                     .title("Marker in Sydney")
                     .icon(BitmapDescriptorFactory.fromBitmap(bhalfsize1)));
-        */
+
             Bitmap b2 = drawableToBitmap(getResources().getDrawable(R.drawable.alumbrado));
             Bitmap bhalfsize2 = Bitmap.createScaledBitmap(b2, b2.getWidth() / 4, b2.getHeight() / 4, false);
             mMap.addMarker(new MarkerOptions().position(sydney2)
@@ -357,7 +308,7 @@ public class MenuActivity extends AppCompatActivity
             mMap.addMarker(new MarkerOptions().position(sydney3)
                     .title("Marker in Sydney3")
                     .icon(BitmapDescriptorFactory.fromBitmap(bhalfsize)));
-
+            */
             CameraPosition cameraPosition = new CameraPosition.Builder()
                     .target(latLng)
                     .zoom(13)
@@ -373,6 +324,8 @@ public class MenuActivity extends AppCompatActivity
                         String reprId = data.get(i).getId();
                         if(id.equals(reprId)){
                             layoutManager.scrollToPositionWithOffset(i, 20);
+                            Log.d("TAG LAT",marker.getPosition().latitude+"");
+                            Log.d("TAG LONG",marker.getPosition().longitude+"");
                         }
                     }
 /*
@@ -387,9 +340,11 @@ public class MenuActivity extends AppCompatActivity
                     return false;
                 }
             });
+        new Http_GetReports(latitude,longitude).execute();
     }
 
 
+    //----------------------------------------------------------------------------------------------
     public static Bitmap drawableToBitmap(Drawable drawable) {
         Bitmap bitmap = null;
 
@@ -412,6 +367,7 @@ public class MenuActivity extends AppCompatActivity
         return bitmap;
     }
 
+    //----------------------------------------------------------------------------------------------
     public void find_Location(Context con) {
         Log.d("Find Location", "in find_location");
         String location_context = Context.LOCATION_SERVICE;
@@ -616,7 +572,7 @@ public class MenuActivity extends AppCompatActivity
 
     }
 
-    //Auxiliar class holder ------------------------------------------------------------
+    //Auxiliar class holder ------------------------------------------------------------------------
     public class View_Holder extends RecyclerView.ViewHolder {
 
         TextView title,description,state,more;
@@ -631,4 +587,136 @@ public class MenuActivity extends AppCompatActivity
             category_img = (ImageView) itemView.findViewById(R.id.category_img);
         }
     }
+
+    //----------------------------------------------------------------------------------------------
+    //ASYNC TASK BRINGING THE NEARESTS REPORTS
+    //----------------------------------------------------------------------------------------------
+        private class Http_GetReports extends AsyncTask<Void, Void, ArrayList<Report>>
+    {
+        ProgressDialog loading;
+        double latitude,longitude;
+
+        public Http_GetReports(double latitude,double longitude){
+            this.latitude=latitude;
+            this.longitude=longitude;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            //loading = ProgressDialog.show(MenuActivity.this, "Comprobando datos...",
+              //      "Puede tardar unos segundos", true, true);
+            loading = new ProgressDialog(MenuActivity.this,R.style.StyledDialog);
+            loading.setInverseBackgroundForced(true);
+            loading.setCancelable(false);
+            loading.show();
+        }
+
+        @Override
+        protected ArrayList<Report> doInBackground(Void... params)
+        {   ArrayList<Report> ret=new ArrayList<>();
+
+            try
+            {
+                //TO DO GET REPORTS
+                //----------------------------------------------------------------------------------
+                Thread.sleep(2000);
+                ret.add(new Report("id123", "String title", "String description",
+                        "String address", "String referencePoint", 3.391318,
+                        0, -76.5238619, Report.PUBLISHED, "Acueducto y alcantarillado", "hoy", null));
+                ret.add(new Report("id124", "String title", "String description",
+                        "String address", "String referencePoint", 3.391318,
+                        0, -76.54386190000001, Report.IN_PROCESS, "Estado de las vias", "hoy", null));
+                ret.add(new Report("id125", "String title", "String description",
+                        "String address", "String referencePoint", 3.4113179999999996,
+                        0, -76.54386190000001, Report.SOLVED, "Basura", "hoy", null));
+                //----------------------------------------------------------------------------------
+
+            } catch (Exception e)
+            {
+                Log.e("MainActivity", e.getMessage(), e);
+            }
+            return ret;
+        }
+
+        @Override
+        protected void onPostExecute(ArrayList<Report> info)
+        {
+
+            data=info;
+            String[] categories=getResources().getStringArray(R.array.categories);
+            for(int i = 0; i<data.size(); i++){
+                Report rep = data.get(i);
+                String category = rep.getCategory();
+                double lat=rep.getLatitude();
+                double lon=rep.getLongitude();
+                LatLng pos = new LatLng(lat,lon);
+
+                if(category.equals(categories[0])){
+                    Bitmap b1 = drawableToBitmap(getResources().getDrawable(imageIDs[0]));
+                    Bitmap bhalfsize1 = Bitmap.createScaledBitmap(b1, b1.getWidth() / 4, b1.getHeight() / 4, false);
+
+                    mMap.addMarker(new MarkerOptions().position(pos)
+                            .title(rep.getId())
+                            .snippet(rep.getTitle())
+                            .icon(BitmapDescriptorFactory.fromBitmap(bhalfsize1)));
+
+                }else if(category.equals(categories[1])){
+                    Bitmap b1 = drawableToBitmap(getResources().getDrawable(imageIDs[1]));
+                    Bitmap bhalfsize1 = Bitmap.createScaledBitmap(b1, b1.getWidth() / 4, b1.getHeight() / 4, false);
+
+                    mMap.addMarker(new MarkerOptions().position(pos)
+                            .title(rep.getId())
+                            .snippet(rep.getTitle())
+                            .icon(BitmapDescriptorFactory.fromBitmap(bhalfsize1)));
+
+                }else if(category.equals(categories[2])){
+                    Bitmap b1 = drawableToBitmap(getResources().getDrawable(imageIDs[2]));
+                    Bitmap bhalfsize1 = Bitmap.createScaledBitmap(b1, b1.getWidth() / 4, b1.getHeight() / 4, false);
+
+                    mMap.addMarker(new MarkerOptions().position(pos)
+                            .title(rep.getId())
+                            .snippet(rep.getTitle())
+                            .icon(BitmapDescriptorFactory.fromBitmap(bhalfsize1)));
+
+                }else if(category.equals(categories[3])){
+                    Bitmap b1 = drawableToBitmap(getResources().getDrawable(imageIDs[3]));
+                    Bitmap bhalfsize1 = Bitmap.createScaledBitmap(b1, b1.getWidth() / 4, b1.getHeight() / 4, false);
+
+                    mMap.addMarker(new MarkerOptions().position(pos)
+                            .title(rep.getId())
+                            .snippet(rep.getTitle())
+                            .icon(BitmapDescriptorFactory.fromBitmap(bhalfsize1)));
+
+                }else if(category.equals(categories[4])){
+                    Bitmap b1 = drawableToBitmap(getResources().getDrawable(imageIDs[4]));
+                    Bitmap bhalfsize1 = Bitmap.createScaledBitmap(b1, b1.getWidth() / 4, b1.getHeight() / 4, false);
+
+                    mMap.addMarker(new MarkerOptions().position(pos)
+                            .title(rep.getId())
+                            .snippet(rep.getTitle())
+                            .icon(BitmapDescriptorFactory.fromBitmap(bhalfsize1)));
+
+                }else if(category.equals(categories[5])){
+                    Bitmap b1 = drawableToBitmap(getResources().getDrawable(imageIDs[5]));
+                    Bitmap bhalfsize1 = Bitmap.createScaledBitmap(b1, b1.getWidth() / 4, b1.getHeight() / 4, false);
+
+                    mMap.addMarker(new MarkerOptions().position(pos)
+                            .title(rep.getId())
+                            .snippet(rep.getTitle())
+                            .icon(BitmapDescriptorFactory.fromBitmap(bhalfsize1)));
+
+                }
+            }
+
+            layoutManager = new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.HORIZONTAL, false);
+            RecyclerView myList = (RecyclerView) findViewById(R.id.my_recycler_view);
+            Recycler_View_Adapter adapter = new Recycler_View_Adapter(data, getApplication());
+            myList.setAdapter(adapter);
+            myList.setLayoutManager(layoutManager);
+
+            loading.dismiss();
+        }
+    }
+
 }

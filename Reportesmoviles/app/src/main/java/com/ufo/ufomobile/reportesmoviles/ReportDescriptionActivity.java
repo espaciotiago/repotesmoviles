@@ -35,6 +35,7 @@ public class ReportDescriptionActivity extends AppCompatActivity {
     List<Bitmap> data;
     ImageButton mapview;
     ImageView categoryImage;
+    int resource_category;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,7 +45,7 @@ public class ReportDescriptionActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        Report report = (Report) getIntent().getSerializableExtra("report");
+        final Report report = (Report) getIntent().getSerializableExtra("report");
         String stat = report.getStatus();
         String cat = report.getCategory();
         String[] categories=getResources().getStringArray(R.array.categories);
@@ -79,16 +80,22 @@ public class ReportDescriptionActivity extends AppCompatActivity {
 
         if(cat.equals(categories[0])){
             categoryImage.setImageResource(imageIDs[0]);
+            resource_category=imageIDs[0];
         }else if(cat.equals(categories[1])){
             categoryImage.setImageResource(imageIDs[1]);
+            resource_category=imageIDs[1];
         }else if(cat.equals(categories[2])){
             categoryImage.setImageResource(imageIDs[2]);
+            resource_category=imageIDs[2];
         }else if(cat.equals(categories[3])){
             categoryImage.setImageResource(imageIDs[3]);
+            resource_category=imageIDs[3];
         }else if(cat.equals(categories[4])){
             categoryImage.setImageResource(imageIDs[4]);
+            resource_category=imageIDs[4];
         }else if(cat.equals(categories[5])){
             categoryImage.setImageResource(imageIDs[5]);
+            resource_category=imageIDs[5];
         }
 
         if(stat.equals(Report.IN_PROCESS)){
@@ -114,9 +121,12 @@ public class ReportDescriptionActivity extends AppCompatActivity {
         mapview.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                double lat = report.getLatitude();
+                double lon = report.getLongitude();
+                String addr = report.getAddress();
                 AddressViewDialogFragment newFragment;
                 FragmentManager fragmentManager = getSupportFragmentManager();
-                newFragment = AddressViewDialogFragment.newInstance(-33.867, 151.206,"Direccion",R.drawable.acueducto);
+                newFragment = AddressViewDialogFragment.newInstance(lat, lon,addr,resource_category);
                 FragmentTransaction transaction = fragmentManager.beginTransaction();
                 transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
                 transaction.add(android.R.id.content, newFragment).addToBackStack(null).commit();

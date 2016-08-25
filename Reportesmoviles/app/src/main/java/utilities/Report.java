@@ -1,6 +1,7 @@
 package utilities;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
 /**
  * Created by smartin on 27/06/2016.
@@ -10,14 +11,14 @@ public class Report implements Serializable{
     public final static String IN_PROCESS="En tramite";
     public final static String SOLVED="Solucionado";
 
-    private String id,title,description,address,referencePoint,state,category,date;
+    private String id,title,description,address,referencePoint,status,category,date;
     private int supports;
     private double latitude,longitude;
-    private String[] images;
+    private ArrayList<String> images;
 
     public Report(String id, String title, String description,
                   String address, String referencePoint, double latitude,int supports,
-                  double longitude, String state, String category,String date,String[] images) {
+                  double longitude, String status, String category,String date,ArrayList<String>  images) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -26,7 +27,7 @@ public class Report implements Serializable{
         this.latitude = latitude;
         this.longitude = longitude;
         this.supports = supports;
-        this.state = state;
+        this.status = status;
         this.images = images;
         this.category = category;
         this.date=date;
@@ -88,12 +89,12 @@ public class Report implements Serializable{
         this.longitude = longitude;
     }
 
-    public String getState() {
-        return state;
+    public String getStatus() {
+        return status;
     }
 
-    public void setState(String state) {
-        this.state = state;
+    public void setStatus(String state) {
+        this.status = state;
     }
 
     public String getCategory() {
@@ -104,11 +105,11 @@ public class Report implements Serializable{
         this.category = category;
     }
 
-    public String[] getImages() {
+    public ArrayList<String>  getImages() {
         return images;
     }
 
-    public void setImages(String[] images) {
+    public void setImages(ArrayList<String>  images) {
         this.images = images;
     }
 

@@ -2,6 +2,7 @@ package com.ufo.ufomobile.reportesmoviles;
 
 import android.*;
 import android.Manifest;
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -22,6 +23,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -48,10 +50,16 @@ public class AddressPickerDialogFragment extends DialogFragment implements OnMap
     private GoogleMap mMap;
     private SupportMapFragment fragment;
     private EditText address;
+    private ImageButton addAddress;
     LocationManager locationManager;
-    double longitude,latitude=0;
+    double longitude,latitude,longitude_rep,latitude_rep=0;
     private LatLng latiLong;
     private MarkerOptions markerOptions;
+    OnaAddSelected mListener;
+
+    public interface OnaAddSelected {
+        public void onArticleSelectedListener(String addr,double latitude,double longitude);
+    }
 
     public AddressPickerDialogFragment(){
         fragment = new SupportMapFragment();
@@ -63,11 +71,35 @@ public class AddressPickerDialogFragment extends DialogFragment implements OnMap
         // Inflate the layout to use as dialog or embedded fragment
         View view=inflater.inflate(R.layout.address_picker_dialog, container, false);
         address = (EditText) view.findViewById(R.id.address);
+        addAddress = (ImageButton) view.findViewById(R.id.add_address);
+        addAddress.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String addr=address.getText().toString();
+                if(!addr.equals("")){
+                    mListener.onArticleSelectedListener(addr,latitude_rep,longitude_rep);
+                    dismiss();
+                }else{
+                    Toast.makeText(getActivity(),
+                            getResources().getString(R.string.address_no_selected_error),Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
         //Map ---------------------------------------------------------------------------------
         FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
         transaction.add(R.id.mapView, fragment).commit();
         fragment.getMapAsync(this);
         return view;
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        try {
+            mListener = (OnaAddSelected) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString() + " must implement OnArticleSelectedListener");
+        }
     }
 
     @Override
@@ -97,10 +129,12 @@ public class AddressPickerDialogFragment extends DialogFragment implements OnMap
         //Location ---------------------------------------------------------------
         mMap.setMyLocationEnabled(true);
         find_Location(getActivity().getApplicationContext());
-        LatLng latLng = new LatLng(latitude, longitude);
+        final LatLng latLng = new LatLng(latitude, longitude);
         try {
             Geocoder geocoder = new Geocoder(getActivity().getApplicationContext(), Locale.getDefault());
             List<Address> addresses = geocoder.getFromLocation(latitude,longitude, 1);
+            latitude_rep=latitude;
+            longitude_rep=longitude;
             address.setText(addresses.get(0).getAddressLine(0) + " " + addresses.get(0).getAddressLine(1));
         } catch (IOException e) {
             e.printStackTrace();
@@ -125,6 +159,8 @@ public class AddressPickerDialogFragment extends DialogFragment implements OnMap
                 List<Address> addresses  = null;
                 try {
                     addresses = geocoder.getFromLocation(newLoc.latitude,newLoc.longitude, 1);
+                    latitude_rep=newLoc.latitude;
+                    longitude_rep=newLoc.longitude;
                     address.setText(addresses.get(0).getAddressLine(0) + " " + addresses.get(0).getAddressLine(1));
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -201,6 +237,8 @@ public class AddressPickerDialogFragment extends DialogFragment implements OnMap
             }
         }
     }
+
+    //Address search task --------------------------------------------------------------------------
 
     private class GeocoderTask extends AsyncTask<String, Void, List<Address>> {
 

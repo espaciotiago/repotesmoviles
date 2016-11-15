@@ -34,12 +34,12 @@ public class EditProfileDialogFragment extends DialogFragment {
     private EditText name,idNumber,phone,place;
     private ImageView picture;
     private Button done;
-    OnaAddSelected mListener;
+    OnaEditProfileSelected mListener;
     private Bitmap bitmap;
     private Uri filePath;
 
-    public interface OnaAddSelected {
-        public void onArticleSelectedListener(String name,String idNum,String phone,String place,String picture);
+    public interface OnaEditProfileSelected {
+        public void onEditProfileSelectedListener(String name,String idNum,String phone,String place,String picture);
     }
 
     public EditProfileDialogFragment(){
@@ -104,7 +104,7 @@ public class EditProfileDialogFragment extends DialogFragment {
                 String pho=phone.getText().toString();
                 String plc=place.getText().toString();
                 if(!nam.equals("") && !idNum.equals("") && !pho.equals("") && !plc.equals("")) {
-                    mListener.onArticleSelectedListener(nam, idNum, pho, plc,newPicture);
+                    mListener.onEditProfileSelectedListener(nam, idNum, pho, plc,newPicture);
                     dismiss();
                 }else{
                     Toast.makeText(getActivity(),
@@ -133,7 +133,7 @@ public class EditProfileDialogFragment extends DialogFragment {
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         try {
-            mListener = (OnaAddSelected) activity;
+            mListener = (OnaEditProfileSelected) activity;
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString() + " must implement OnArticleSelectedListener");
         }

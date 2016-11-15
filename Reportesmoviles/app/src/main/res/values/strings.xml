@@ -30,6 +30,12 @@
     <string name="signup">REGISTRO</string>
     <string name="start">comenzar</string>
     <string name="done">HECHO</string>
+    <string name="like">Apoyar</string>
+    <string name="comment">Comentar</string>
+
+    <string name="reports">Reportes</string>
+    <string name="likes">Apoyos</string>
+    <string name="comments">Comentarios</string>
 
     <string name="mail_hint">Correo electronico</string>
     <string name="password_hint">Contraseña</string>
@@ -53,6 +59,7 @@
     <string name="agreement_error">Debe aceptar los terminos y condiciones para continuar</string>
     <string name="no_match_password_error">Las contraseñas no coinciden</string>
     <string name="address_no_selected_error">No ha seleccionado ninguna dirección</string>
+
     <!--
     Report categories
     -->
@@ -62,14 +69,14 @@
         <item>Basura</item>
         <item>Semaforización</item>
         <item>Señalización</item>
-        <item>Otro</item>
-
         <item>Transito</item>
         <item>Espacio público</item>
         <item>Infraestructura y vias</item>
         <item>Protección animal</item>
         <item>Seguridad</item>
+        <item>Otro</item>
     </string-array>
+
     <string name="aqueduct">Acueducto y alcantarillado</string>
     <string name="roads">Estado de las vias</string>
     <string name="garbage">Basura</string>
@@ -77,9 +84,9 @@
     <string name="signs">Señalización</string>
     <string name="other">Otro</string>
 
-    <string name="title_activity_add_new_report">AddNewReportActivity</string>
+    <string name="title_activity_add_new_report">Añade tu reporte</string>
     <string name="title_activity_report_description">ReportDescriptionActivity</string>
-    <string name="title_activity_notifications">NotificationsActivity</string>
+    <string name="title_activity_notifications">Mis reportes</string>
     <string name="title_activity_initial">InitialActivity</string>
     <string name="title_activity_login">Inicio de sesion</string>
     <string name="title_activity_sign_up">SignUpActivity</string>

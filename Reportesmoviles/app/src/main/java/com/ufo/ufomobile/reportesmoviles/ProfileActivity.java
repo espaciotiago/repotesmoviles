@@ -21,7 +21,7 @@ import android.widget.TextView;
 
 import utilities.User;
 
-public class ProfileActivity extends AppCompatActivity implements EditProfileDialogFragment.OnaAddSelected{
+public class ProfileActivity extends AppCompatActivity implements EditProfileDialogFragment.OnaEditProfileSelected{
 
     private TextView name,mail,idNumber,phone,place;
     private ImageView picture;
@@ -37,13 +37,6 @@ public class ProfileActivity extends AppCompatActivity implements EditProfileDia
         final Drawable upArrow = getResources().getDrawable(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
         upArrow.setColorFilter(getResources().getColor(R.color.colorAccent), PorterDuff.Mode.SRC_ATOP);
         getSupportActionBar().setHomeAsUpIndicator(upArrow);
-<<<<<<< HEAD
-<<<<<<< HEAD
-        //----------------------------------------------------------------------------------------------
-=======
-        //--------------------------------------------------------------------------------------------
->>>>>>> master
-=======
         //------------------------------------------------------------------------------------------
         name=(TextView)findViewById(R.id.name);
         mail=(TextView)findViewById(R.id.mail);
@@ -51,7 +44,6 @@ public class ProfileActivity extends AppCompatActivity implements EditProfileDia
         idNumber=(TextView)findViewById(R.id.id_number);
         place=(TextView)findViewById(R.id.place);
         picture=(ImageView)findViewById(R.id.pic);
->>>>>>> master
 
     }
 
@@ -88,22 +80,20 @@ public class ProfileActivity extends AppCompatActivity implements EditProfileDia
     }
 
     @Override
-    public void onArticleSelectedListener(String name, String idNum, String phone, String place, String newPicture) {
+    public void onEditProfileSelectedListener(String name, String idNum, String phone, String place, String newPicture) {
         this.name.setText(name);
         this.idNumber.setText(idNum);
         this.phone.setText(phone);
         this.place.setText(place);
 
+        Bitmap imag = null;
         if(!newPicture.equals("") && newPicture!=null){
-            Bitmap imag = null;
             byte[] decodedString = Base64.decode(newPicture, Base64.DEFAULT);
             imag = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
             picture.setImageBitmap(imag);
         }
-
         String mai=mail.getText().toString();
 
-        //TO DO Set bd
-        //TO DO Update user http
+        // TODO: 20/09/16 UPDATE BD USER (LOCALE, REMOTE)
     }
 }

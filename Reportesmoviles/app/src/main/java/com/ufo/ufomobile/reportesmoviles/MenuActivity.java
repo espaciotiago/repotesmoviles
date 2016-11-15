@@ -1,6 +1,8 @@
 package com.ufo.ufomobile.reportesmoviles;
 
 import android.Manifest;
+import android.annotation.TargetApi;
+import android.app.AlertDialog;
 import android.app.Notification;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -18,14 +20,18 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -61,6 +67,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
+import utilities.Constants;
 import utilities.DBHelper;
 import utilities.Report;
 import utilities.User;
@@ -86,6 +93,11 @@ public class MenuActivity extends AppCompatActivity
     List<Report> data;
     DBHelper db;
     User user;
+    CategorySelectionDialogFragment newFragment;
+
+    private int positionList = -1;
+    private int stateScroll = -1;
+    private int scrollPos = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,83 +108,43 @@ public class MenuActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        //Database ----------------------------------------------------------------------------
+        //Database ---------------------------------------------------------------------------------
         db=new DBHelper(this);
         user = db.userExists();
-        //Map ---------------------------------------------------------------------------------
+        //Map --------------------------------------------------------------------------------------
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        //Drawer ------------------------------------------------------------------------------
+        //Drawer -----------------------------------------------------------------------------------
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
-        //Navigationview ----------------------------------------------------------------------
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        //Navigationview ---------------------------------------------------------------------------
+        NavigationView navigationView = (NavigationView) drawer.findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        //Gallery -----------------------------------------------------------------------------
-        /*
-        gallery = (Gallery) findViewById(R.id.gallery);
-        gallery.setAdapter(new ImageAdapter(this));
-        gallery.setUnselectedAlpha(1.0f);
-        int selection = (int) (Integer.MAX_VALUE / 2) - ((Integer.MAX_VALUE / 2) % 6);
-        gallery.setSelection((int) (Integer.MAX_VALUE / 2) - ((Integer.MAX_VALUE / 2) % imageIDs.length));
-        gallery.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                //ImageView imageView = (ImageView) findViewById(R.id.image1);
-                //imageView.setImageResource(imageIDs[i]);
-                if (lastSelectedView != null) {
-                    lastSelectedView.setLayoutParams(new Gallery.LayoutParams(130, 82));
-                }
-                if (view != null) {
-                    view.setLayoutParams(new Gallery.LayoutParams(130, 87));
-                    lastSelectedView = view;
-                }
-            }
+        //View headerView = navigationView.inflateHeaderView(R.layout.nav_header_menu);
+        ImageView navHeaderImageView = (ImageView) navigationView.findViewById(R.id.nav_profile_pic);
+        TextView navHeaderName = (TextView) navigationView.findViewById(R.id.nav_name);
+        TextView navHeaderMail = (TextView) navigationView.findViewById(R.id.nav_mail);
 
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
-            }
-        });
-        gallery.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent goToReport = new Intent(MenuActivity.this, AddNewReportActivity.class);
-                goToReport.putExtra("category_icon", imageIDs[position % imageIDs.length]);
-                startActivity(goToReport);
-            }
-        });
-        */
+        //Put the header information
+        if(user.getImage()!=null && !user.getImage().equals("")){
+            // TODO: 20/09/16 Set header imager
+        }
+        navHeaderName.setText(user.getName());
+        navHeaderMail.setText(user.getMail());
 
         //Horizontal list --------------------------------------------------------------------------
-        //------------------------------------------------------------------------------------------
         data = new ArrayList<Report>();
-        /*
-        data.add(new Report("id123", "String title", "String description",
-                "String address", "String referencePoint", 3.391318,
-                0, -76.5238619, Report.PUBLISHED, "Acueducto y alcantarillado", "hoy", null));
-        data.add(new Report("id124", "String title", "String description",
-                "String address", "String referencePoint", 3.391318,
-                0, -76.54386190000001, Report.IN_PROCESS, "Estado de las vias", "hoy", null));
-        data.add(new Report("id125", "String title", "String description",
-                "String address", "String referencePoint", 3.4113179999999996,
-                0, -76.54386190000001, Report.SOLVED, "Basura", "hoy", null));
+        //------------------------------------------------------------------------------------------
 
-        //------------------------------------------------------------------------------------------
-        layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
-        RecyclerView myList = (RecyclerView) findViewById(R.id.my_recycler_view);
-        Recycler_View_Adapter adapter = new Recycler_View_Adapter(data, getApplication());
-        myList.setAdapter(adapter);
-        myList.setLayoutManager(layoutManager);
-        */
-        //------------------------------------------------------------------------------------------
+        permisosCamara();
+        permisosGPS();
     }
 
     @Override
@@ -180,7 +152,11 @@ public class MenuActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
-        } else {
+        }else if(newFragment!=null){
+            dismissAllDialogFragments();
+            newFragment = null;
+        }
+        else {
             super.onBackPressed();
         }
     }
@@ -206,15 +182,18 @@ public class MenuActivity extends AppCompatActivity
             return true;
         }
         if(id == R.id.action_report){
-            CategorySelectionDialogFragment newFragment;
             FragmentManager fragmentManager = getSupportFragmentManager();
             newFragment = new CategorySelectionDialogFragment();
             FragmentTransaction transaction = fragmentManager.beginTransaction();
             transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-            transaction.add(android.R.id.content, newFragment).addToBackStack(null).commit();
+            transaction.add(android.R.id.content, newFragment).addToBackStack("dialog").commit();
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    public void dismissAllDialogFragments() {
+        getSupportFragmentManager().popBackStack("dialog", FragmentManager.POP_BACK_STACK_INCLUSIVE);
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
@@ -229,7 +208,7 @@ public class MenuActivity extends AppCompatActivity
             newFragment = new CategorySelectionDialogFragment();
             FragmentTransaction transaction = fragmentManager.beginTransaction();
             transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-            transaction.add(android.R.id.content, newFragment).addToBackStack(null).commit();
+            transaction.add(android.R.id.content, newFragment).addToBackStack("dialog").commit();
         }else if(id==R.id.nav_profile){
             Intent goToProfile = new Intent(MenuActivity.this, ProfileActivity.class);
             startActivity(goToProfile);
@@ -245,25 +224,60 @@ public class MenuActivity extends AppCompatActivity
 
         //Filtros
 
-/*
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
 
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
-        }
-*/
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
+    // PERMISOS ------------------------------------------------------------------------------------
+    private void permisosGPS() {
+
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION) &&
+                    ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_COARSE_LOCATION)) {
+                // PoneGPS
+            } else {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, Constants.PERMISO_GPS);
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, Constants.PERMISO_GPS);
+            }
+        }
+    }
+
+    private void permisosCamara() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA) &&
+                    ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+            } else {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, Constants.PERMISO_CAMARA);
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, Constants.PERMISO_CAMARA);
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case Constants.PERMISO_GPS: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // PoneGPS
+                } else {
+
+                }
+                return;
+            }
+            case Constants.PERMISO_CAMARA: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    return;
+                } else {
+                    return;
+                }
+            }
+        }
+    }
+    //----------------------------------------------------------------------------------------------
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -326,6 +340,7 @@ public class MenuActivity extends AppCompatActivity
                             layoutManager.scrollToPositionWithOffset(i, 20);
                             Log.d("TAG LAT",marker.getPosition().latitude+"");
                             Log.d("TAG LONG",marker.getPosition().longitude+"");
+                            positionList = i;
                         }
                     }
 /*
@@ -417,65 +432,6 @@ public class MenuActivity extends AppCompatActivity
     }
 
     //--------------------------------------------------------------------------------------------------------------
-    //IMAGE ADAPTER FOR GALLERY
-    //--------------------------------------------------------------------------------------------------------------
-
-    public class ImageAdapter extends BaseAdapter {
-        private Context context;
-        private int itemBackground;
-        public ImageAdapter(Context c)
-        {
-            context = c;
-            // sets a grey background; wraps around the images
-/*
-            TypedArray a =obtainStyledAttributes(R.styleable.MyGallery);
-            itemBackground = a.getResourceId(R.styleable.MyGallery_android_galleryItemBackground, 0);
-            a.recycle();*/
-
-        }
-        // returns the number of images
-        public int getCount() {
-            //return imageIDs.length;
-            return Integer.MAX_VALUE;
-        }
-        // returns the ID of an item
-        public Object getItem(int position) {
-            return position;
-        }
-        // returns the ID of an item
-        public long getItemId(int position) {
-            int pos = position % imageIDs.length;
-            return pos;
-        }
-        // returns an ImageView view
-        public View getView(int position, View convertView, ViewGroup parent) {
-            View rowView = convertView;
-
-            if (convertView == null) {
-                // Create a new view into the list.
-                LayoutInflater inflater = (LayoutInflater) context
-                        .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                rowView = inflater.inflate(R.layout.gallery_adapter_layout, parent, false);
-            }
-            /*
-            ImageView imageView = new ImageView(context);
-            imageView.setImageResource(imageIDs[position].getRecurso());
-            imageView.setLayoutParams(new Gallery.LayoutParams(100, 100));
-            imageView.setBackgroundResource(itemBackground);
-            return imageView;
-            */
-            position=position%imageIDs.length;
-            ImageView img = (ImageView)rowView.findViewById(R.id.img);
-            img.setImageResource(imageIDs[position%imageIDs.length]);
-            //image.setImageResource(imageIDs[position%imageIDs.length]);
-            //image.setImageResource(R.drawable.acueducto);
-            rowView.setLayoutParams(new Gallery.LayoutParams(130, 82));
-            //rowView.setBackgroundResource(itemBackground);
-            return rowView;
-        }
-    }
-
-    //--------------------------------------------------------------------------------------------------------------
     //RECYCLER VIEW ADAPTER FOR HORIZONTAL SCROLL
     //--------------------------------------------------------------------------------------------------------------
     public class Recycler_View_Adapter extends RecyclerView.Adapter<View_Holder> {
@@ -531,10 +487,9 @@ public class MenuActivity extends AppCompatActivity
                 holder.category_img.setImageResource(imageIDs[5]);
             }
 
-            holder.more.setOnClickListener(new View.OnClickListener() {
+            holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Log.d("CLICK",position+"");
                     Report report=list.get(position);
                     Intent goToDescription = new Intent(getApplicationContext(),ReportDescriptionActivity.class);
                     goToDescription.putExtra("report",report);
@@ -575,7 +530,7 @@ public class MenuActivity extends AppCompatActivity
     //Auxiliar class holder ------------------------------------------------------------------------
     public class View_Holder extends RecyclerView.ViewHolder {
 
-        TextView title,description,state,more;
+        TextView title,state,description;//,more;
         ImageView category_img;
 
         View_Holder(View itemView) {
@@ -583,11 +538,12 @@ public class MenuActivity extends AppCompatActivity
             title = (TextView) itemView.findViewById(R.id.title);
             description = (TextView) itemView.findViewById(R.id.description);
             state = (TextView) itemView.findViewById(R.id.state);
-            more = (TextView) itemView.findViewById(R.id.more);
+            //more = (TextView) itemView.findViewById(R.id.more);
             category_img = (ImageView) itemView.findViewById(R.id.category_img);
         }
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////
     //----------------------------------------------------------------------------------------------
     //ASYNC TASK BRINGING THE NEARESTS REPORTS
     //----------------------------------------------------------------------------------------------
@@ -621,7 +577,9 @@ public class MenuActivity extends AppCompatActivity
                 //TO DO GET REPORTS
                 //----------------------------------------------------------------------------------
                 Thread.sleep(2000);
-                ret.add(new Report("id123", "String title", "String description",
+                ret.add(new Report("id123", "Titulo del reportes lo suficientmente largo", "Esta es una descripción" +
+                        " del reporte considerablemente larga, a manera de prueba." +
+                        "La idea es ver que tal se ve en la UI. Descripción de prueba de id123.",
                         "String address", "String referencePoint", 3.391318,
                         0, -76.5238619, Report.PUBLISHED, "Acueducto y alcantarillado", "hoy", null));
                 ret.add(new Report("id124", "String title", "String description",
@@ -639,6 +597,7 @@ public class MenuActivity extends AppCompatActivity
             return ret;
         }
 
+        @TargetApi(Build.VERSION_CODES.M)
         @Override
         protected void onPostExecute(ArrayList<Report> info)
         {
@@ -710,11 +669,39 @@ public class MenuActivity extends AppCompatActivity
             }
 
             layoutManager = new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.HORIZONTAL, false);
-            RecyclerView myList = (RecyclerView) findViewById(R.id.my_recycler_view);
+            final RecyclerView myList = (RecyclerView) findViewById(R.id.my_recycler_view);
             Recycler_View_Adapter adapter = new Recycler_View_Adapter(data, getApplication());
             myList.setAdapter(adapter);
             myList.setLayoutManager(layoutManager);
 
+            /*
+            myList.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                @Override
+                public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                    super.onScrollStateChanged(recyclerView, newState);
+                    stateScroll = newState;
+                    if(stateScroll==2) {
+                        if (scrollPos > 0) {
+                            if (positionList < data.size()) {
+                                positionList++;
+                                layoutManager.scrollToPositionWithOffset(positionList,20);
+                            }
+                        } else if (scrollPos < 0) {
+                            if (positionList >= 0) {
+                                positionList--;
+                                layoutManager.scrollToPositionWithOffset(positionList,20);
+                            }
+                        }
+                    }
+                }
+
+                @Override
+                public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                    super.onScrolled(recyclerView, dx, dy);
+                    scrollPos = dx;
+                }
+            });
+            */
             loading.dismiss();
         }
     }

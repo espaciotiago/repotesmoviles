@@ -13,18 +13,23 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentTransaction;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -65,11 +70,26 @@ public class AddressPickerDialogFragment extends DialogFragment implements OnMap
         fragment = new SupportMapFragment();
     }
 
+    public static AddressPickerDialogFragment newInstance(){
+        AddressPickerDialogFragment f = new AddressPickerDialogFragment();
+;
+        return f;
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+        getDialog().setCanceledOnTouchOutside(true);
+        getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
         // Inflate the layout to use as dialog or embedded fragment
         View view=inflater.inflate(R.layout.address_picker_dialog, container, false);
+        return view;
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         address = (EditText) view.findViewById(R.id.address);
         addAddress = (ImageButton) view.findViewById(R.id.add_address);
         addAddress.setOnClickListener(new View.OnClickListener() {
@@ -89,7 +109,8 @@ public class AddressPickerDialogFragment extends DialogFragment implements OnMap
         FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
         transaction.add(R.id.mapView, fragment).commit();
         fragment.getMapAsync(this);
-        return view;
+        getDialog().getWindow().setSoftInputMode(
+                WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
     }
 
     @Override
@@ -100,17 +121,6 @@ public class AddressPickerDialogFragment extends DialogFragment implements OnMap
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString() + " must implement OnArticleSelectedListener");
         }
-    }
-
-    @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-        // The only reason you might override this method when using onCreateView() is
-        // to modify any dialog characteristics. For example, the dialog includes a
-        // title by default, but your custom layout might not need it. So here you can
-        // remove the dialog title, but you must call the superclass to get the Dialog.
-        Dialog dialog = super.onCreateDialog(savedInstanceState);
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        return dialog;
     }
 
     @Override
@@ -199,7 +209,6 @@ public class AddressPickerDialogFragment extends DialogFragment implements OnMap
     }
 
     public void find_Location(Context con) {
-        Log.d("Find Location", "in find_location");
         String location_context = Context.LOCATION_SERVICE;
         locationManager = (LocationManager) con.getSystemService(location_context);
         List<String> providers = locationManager.getProviders(true);

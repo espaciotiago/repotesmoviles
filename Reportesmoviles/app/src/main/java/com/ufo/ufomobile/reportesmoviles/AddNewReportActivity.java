@@ -88,12 +88,9 @@ public class AddNewReportActivity extends AppCompatActivity implements AddressPi
         mapview.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                AddressPickerDialogFragment newFragment;
-                FragmentManager fragmentManager = getSupportFragmentManager();
-                newFragment = new AddressPickerDialogFragment();
-                FragmentTransaction transaction = fragmentManager.beginTransaction();
-                transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-                transaction.add(android.R.id.content, newFragment).addToBackStack(null).commit();
+                FragmentManager fm = getSupportFragmentManager();
+                AddressPickerDialogFragment dialog = AddressPickerDialogFragment.newInstance();
+                dialog.show(fm, "dialog");
             }
         });
 
@@ -145,7 +142,7 @@ public class AddNewReportActivity extends AppCompatActivity implements AddressPi
                 if(!tit.equals("") && !desc.equals("") && !addr.equals("") && !ref.equals("")){
                     Report report = new Report("00",tit,desc,addr,ref,
                             latitude,0,longitude,Report.PUBLISHED,categoryName,date,images);
-                    //TO DO Enviar reporte
+                    //TODO Enviar reporte
                     Toast.makeText(getApplicationContext(),
                             data.size()+"",Toast.LENGTH_SHORT).show();
                 }else {
@@ -154,6 +151,11 @@ public class AddNewReportActivity extends AppCompatActivity implements AddressPi
                 }
             }
         });
+
+        //Open the dialog at first
+        FragmentManager fm = getSupportFragmentManager();
+        AddressPickerDialogFragment dialog = AddressPickerDialogFragment.newInstance();
+        dialog.show(fm, "dialog");
     }
 
     protected void onActivityResult(int requestCode, int resultCode, Intent imageReturnedIntent) {

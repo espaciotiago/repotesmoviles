@@ -1,55 +1,73 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <group android:checkableBehavior="single">
+
+    <group>
         <item
             android:id="@+id/nav_profile"
-            android:icon="@drawable/user"
+            android:icon="@drawable/ic_person_pin_black_48dp"
             android:title="@string/my_profile" />
         <item
             android:id="@+id/nav_reports"
-            android:icon="@drawable/reports"
+            android:icon="@drawable/ic_mode_grey_black_48dp"
             android:title="@string/my_reports" />
         <item
             android:id="@+id/nav_new_report"
-            android:icon="@drawable/add"
+            android:icon="@drawable/ic_note_add_black_48dp"
             android:title="@string/add_new_report" />
     </group>
 
     <item android:title="Filtros">
         <menu>
-            <item
-                android:id="@+id/nav_aqueduct"
-                android:icon="@drawable/ic_acueducto"
-                android:title="@string/aqueduct" />
-            <item
-                android:id="@+id/nav_roads"
-                android:icon="@drawable/ic_alcantarillado"
-                android:title="@string/roads" />
-            <item
-                android:id="@+id/nav_garbage"
-                android:icon="@drawable/ic_alumbrado"
-                android:title="@string/garbage" />
-            <item
-                android:id="@+id/nav_traffic_lights"
-                android:icon="@drawable/ic_basura"
-                android:title="@string/traffic_lights" />
-            <item
-                android:id="@+id/nav_signs"
-                android:icon="@drawable/ic_limpieza"
-                android:title="@string/signs" />
-            <item
-                android:id="@+id/nav_other"
-                android:icon="@drawable/ic_gas"
-                android:title="@string/other" />
+            <group android:checkableBehavior="single">
+                <item
+                    android:id="@+id/nav_all"
+                    android:icon="@drawable/ic_marker_map"
+                    android:title="@string/all" />
+                <item
+                    android:id="@+id/nav_aqueduct"
+                    android:icon="@drawable/ic_marker_water"
+                    android:title="@string/aqueduct" />
+                <item
+                    android:id="@+id/nav_roads"
+                    android:icon="@drawable/ic_marker_road"
+                    android:title="@string/roads" />
+                <item
+                    android:id="@+id/nav_garbage"
+                    android:icon="@drawable/ic_marker_trash"
+                    android:title="@string/garbage" />
+                <item
+                    android:id="@+id/nav_traffic"
+                    android:icon="@drawable/ic_marker_traffic"
+                    android:title="@string/traffic" />
+                <item
+                    android:id="@+id/nav_public"
+                    android:icon="@drawable/ic_marker_public"
+                    android:title="@string/public_space" />
+                <item
+                    android:id="@+id/nav_animal"
+                    android:icon="@drawable/ic_marker_animal"
+                    android:title="@string/animal" />
+                <item
+                    android:id="@+id/nav_security"
+                    android:icon="@drawable/ic_marker_police"
+                    android:title="@string/security" />
+                <item
+                    android:id="@+id/nav_other"
+                    android:icon="@drawable/ic_marker_other"
+                    android:title="@string/other" />
+            </group>
         </menu>
     </item>
 
     <item android:title="Configuración">
         <menu>
             <item
+                android:id="@+id/nav_about"
+                android:title="@string/about" />
+            <item
                 android:id="@+id/nav_close"
-                android:title="Cerrar sesion" />
+                android:title="@string/close" />
         </menu>
     </item>
 

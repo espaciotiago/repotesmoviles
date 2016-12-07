@@ -3,17 +3,25 @@ package com.ufo.ufomobile.reportesmoviles;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,18 +41,40 @@ public class CategorySelectionDialogFragment extends DialogFragment {
         public void onArticleSelectedListener(int resource, String name);
     }
 
+    public  static CategorySelectionDialogFragment newInstance() {
+
+        Bundle args = new Bundle();
+
+        CategorySelectionDialogFragment fragment = new CategorySelectionDialogFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        getDialog().setCanceledOnTouchOutside(true);
+        getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
         // Inflate the layout to use as dialog or embedded fragment
         View view=inflater.inflate(R.layout.category_selection_dialog, container, false);
+
+        return view;
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        String[] categoriesStr = getResources().getStringArray(R.array.categories);
         categoryList=new ArrayList<Category>();
-        categoryList.add(new Category("Alcantarillado",R.drawable.alcantarillado));
-        categoryList.add(new Category("Alumbrado",R.drawable.alumbrado));
-        categoryList.add(new Category("Acueducto",R.drawable.acueducto));
-        categoryList.add(new Category("Basura",R.drawable.basura));
-        categoryList.add(new Category("Limpieza",R.drawable.limpieza));
-        categoryList.add(new Category("Gas domiciliario",R.drawable.gas));
+        categoryList.add(new Category(categoriesStr[0],R.drawable.ic_marker_water));
+        categoryList.add(new Category(categoriesStr[1],R.drawable.ic_marker_trash));
+        categoryList.add(new Category(categoriesStr[2],R.drawable.ic_marker_traffic));
+        categoryList.add(new Category(categoriesStr[3],R.drawable.ic_marker_public));
+        categoryList.add(new Category(categoriesStr[4],R.drawable.ic_marker_road));
+        categoryList.add(new Category(categoriesStr[5],R.drawable.ic_marker_animal));
+        categoryList.add(new Category(categoriesStr[6],R.drawable.ic_marker_police));
+        categoryList.add(new Category(categoriesStr[7],R.drawable.ic_marker_other));
 
         categories=(ListView)view.findViewById(R.id.categories);
         categories.setAdapter(new ListAdapter(getActivity(), categoryList));
@@ -59,18 +89,8 @@ public class CategorySelectionDialogFragment extends DialogFragment {
                 dismiss();
             }
         });
-        return view;
-    }
-
-    @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-        // The only reason you might override this method when using onCreateView() is
-        // to modify any dialog characteristics. For example, the dialog includes a
-        // title by default, but your custom layout might not need it. So here you can
-        // remove the dialog title, but you must call the superclass to get the Dialog.
-        Dialog dialog = super.onCreateDialog(savedInstanceState);
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        return dialog;
+        getDialog().getWindow().setSoftInputMode(
+                WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
     }
 
     @Override

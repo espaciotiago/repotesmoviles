@@ -50,7 +50,7 @@ public class ReportDescriptionActivity extends AppCompatActivity implements OnMa
      * UI Elements
      */
     CollapsingToolbarLayout collapsingToolbarLayout;
-    TextView date,id,title,description,address,referencePoint,status,supports,comments;
+    TextView date,id,title,description,address,status,supports,comments;
     View likeView,commentView,bottomBarView;
     Recycler_View_Adapter adapter;
     List<Bitmap> data;
@@ -92,12 +92,14 @@ public class ReportDescriptionActivity extends AppCompatActivity implements OnMa
         String cat = report.getCategory();
         String[] categories=getResources().getStringArray(R.array.categories);
         int[] imageIDs = {
-                R.drawable.alcantarillado,
-                R.drawable.alumbrado,
-                R.drawable.acueducto,
-                R.drawable.basura,
-                R.drawable.limpieza,
-                R.drawable.gas,
+                R.drawable.ic_marker_water,
+                R.drawable.ic_marker_trash,
+                R.drawable.ic_marker_traffic,
+                R.drawable.ic_marker_public,
+                R.drawable.ic_marker_road,
+                R.drawable.ic_marker_animal,
+                R.drawable.ic_marker_police,
+                R.drawable.ic_marker_other
         };
         //------------------------------------------------------------------------------------------
         latitude = report.getLatitude();
@@ -111,7 +113,6 @@ public class ReportDescriptionActivity extends AppCompatActivity implements OnMa
         title = (TextView)findViewById(R.id.title);
         description = (TextView)findViewById(R.id.description);
         address = (TextView)findViewById(R.id.address);
-        referencePoint = (TextView)findViewById(R.id.reference_point);
         status = (TextView)findViewById(R.id.status);
         supports= (TextView) findViewById(R.id.supports);
         comments= (TextView) findViewById(R.id.comments);
@@ -125,7 +126,6 @@ public class ReportDescriptionActivity extends AppCompatActivity implements OnMa
         title.setText(report.getTitle());
         description.setText(report.getDescription());
         address.setText(report.getAddress());
-        referencePoint.setText(report.getReferencePoint());
         status.setText(report.getStatus());
         supports.setText(report.getSupports()+"");
 
@@ -147,6 +147,12 @@ public class ReportDescriptionActivity extends AppCompatActivity implements OnMa
         }else if(cat.equals(categories[5])){
             categoryImage.setImageResource(imageIDs[5]);
             resource_category=imageIDs[5];
+        }else if(cat.equals(categories[6])){
+            categoryImage.setImageResource(imageIDs[6]);
+            resource_category=imageIDs[6];
+        }else if(cat.equals(categories[7])){
+            categoryImage.setImageResource(imageIDs[7]);
+            resource_category=imageIDs[7];
         }
 
         if(stat.equals(Report.IN_PROCESS)){
@@ -176,7 +182,15 @@ public class ReportDescriptionActivity extends AppCompatActivity implements OnMa
         myList.setLayoutManager(layoutManager);
 
         //Button -----------------------------------------------------------------------------------
-
+        commentView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //Open the dialog with comments
+                FragmentManager fm = getSupportFragmentManager();
+                CommentsDialogFragment dialog = CommentsDialogFragment.newInstance();
+                dialog.show(fm, "dialog");
+            }
+        });
     }
 
     @Override
@@ -193,7 +207,7 @@ public class ReportDescriptionActivity extends AppCompatActivity implements OnMa
             return;
         }
         Bitmap b1 = drawableToBitmap(getResources().getDrawable(resource_category));
-        Bitmap bhalfsize1 = Bitmap.createScaledBitmap(b1, b1.getWidth() / 4, b1.getHeight() / 4, false);
+        Bitmap bhalfsize1 = Bitmap.createScaledBitmap(b1, b1.getWidth(), b1.getHeight(), false);
         LatLng latLng = new LatLng(latitude,longitude);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 13));
         mMap.addMarker(new MarkerOptions().position(latLng)

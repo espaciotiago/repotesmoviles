@@ -11,14 +11,14 @@
         <ImageView
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:id="@+id/resource" />
+            android:id="@+id/resource"
+            android:padding="5dp" />
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:text="New Text"
             android:id="@+id/name"
-            android:gravity="center"
             android:paddingLeft="@dimen/activity_horizontal_margin"/>
     </LinearLayout>
 </LinearLayout>

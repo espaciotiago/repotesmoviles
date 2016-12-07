@@ -64,7 +64,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 String gender = c.getString(c.getColumnIndex("gender"));
                 String image = c.getString(c.getColumnIndex("image"));
 
-                user = new User(name,mail,password,phone,id,town,gender,image);
+                user = new User(name,mail,password,phone,id,gender,image);
 
             }
             return user;
@@ -84,7 +84,7 @@ public class DBHelper extends SQLiteOpenHelper {
             values.put("password", user.getPassword());
             values.put("phone", user.getPhone());
             values.put("id", user.getId());
-            values.put("town", user.getTown());
+            values.put("town", "");
             values.put("gender", user.getGender());
             values.put("image", user.getImage());
 

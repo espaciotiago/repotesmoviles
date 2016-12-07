@@ -104,26 +104,6 @@
                 android:id="@+id/phone"/>
         </LinearLayout>
 
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:alpha="0.8"
-            android:layout_gravity="center_horizontal" >
-
-            <ImageView
-                android:layout_width="48dp"
-                android:layout_height="match_parent"
-                android:id="@+id/imageView18"
-                android:src="@drawable/place_b" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:ems="10"
-                android:text="Cali-Valle del Cauca"
-                android:id="@+id/place" />
-        </LinearLayout>
     </LinearLayout>
 
     <LinearLayout

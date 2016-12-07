@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
@@ -29,6 +30,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -77,12 +79,14 @@ public class MenuActivity extends AppCompatActivity
         CategorySelectionDialogFragment.OnaAddSelected {
 
     int[] imageIDs = {
-            R.drawable.alcantarillado,
-            R.drawable.alumbrado,
-            R.drawable.acueducto,
-            R.drawable.basura,
-            R.drawable.limpieza,
-            R.drawable.gas,
+            R.drawable.ic_marker_water,
+            R.drawable.ic_marker_trash,
+            R.drawable.ic_marker_traffic,
+            R.drawable.ic_marker_public,
+            R.drawable.ic_marker_road,
+            R.drawable.ic_marker_animal,
+            R.drawable.ic_marker_police,
+            R.drawable.ic_marker_other
     };
     private GoogleMap mMap;
     View lastSelectedView = null;
@@ -126,6 +130,7 @@ public class MenuActivity extends AppCompatActivity
         //Navigationview ---------------------------------------------------------------------------
         NavigationView navigationView = (NavigationView) drawer.findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+        navigationView.setItemIconTintList(null);
 
         //View headerView = navigationView.inflateHeaderView(R.layout.nav_header_menu);
         ImageView navHeaderImageView = (ImageView) navigationView.findViewById(R.id.nav_profile_pic);
@@ -134,7 +139,10 @@ public class MenuActivity extends AppCompatActivity
 
         //Put the header information
         if(user.getImage()!=null && !user.getImage().equals("")){
-            // TODO: 20/09/16 Set header imager
+            byte[] decodedString = Base64.decode(user.getImage(), Base64.NO_PADDING);
+            Bitmap imag = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+            navHeaderImageView.setImageBitmap(imag);
+
         }
         navHeaderName.setText(user.getName());
         navHeaderMail.setText(user.getMail());
@@ -182,11 +190,10 @@ public class MenuActivity extends AppCompatActivity
             return true;
         }
         if(id == R.id.action_report){
-            FragmentManager fragmentManager = getSupportFragmentManager();
-            newFragment = new CategorySelectionDialogFragment();
-            FragmentTransaction transaction = fragmentManager.beginTransaction();
-            transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-            transaction.add(android.R.id.content, newFragment).addToBackStack("dialog").commit();
+            //Open the dialog with categories
+            FragmentManager fm = getSupportFragmentManager();
+            CategorySelectionDialogFragment dialog = CategorySelectionDialogFragment.newInstance();
+            dialog.show(fm, "dialog");
         }
 
         return super.onOptionsItemSelected(item);
@@ -203,12 +210,10 @@ public class MenuActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if(id==R.id.nav_new_report){
-            CategorySelectionDialogFragment newFragment;
-            FragmentManager fragmentManager = getSupportFragmentManager();
-            newFragment = new CategorySelectionDialogFragment();
-            FragmentTransaction transaction = fragmentManager.beginTransaction();
-            transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-            transaction.add(android.R.id.content, newFragment).addToBackStack("dialog").commit();
+            //Open the dialog with categories
+            FragmentManager fm = getSupportFragmentManager();
+            CategorySelectionDialogFragment dialog = CategorySelectionDialogFragment.newInstance();
+            dialog.show(fm, "dialog");
         }else if(id==R.id.nav_profile){
             Intent goToProfile = new Intent(MenuActivity.this, ProfileActivity.class);
             startActivity(goToProfile);
@@ -337,9 +342,10 @@ public class MenuActivity extends AppCompatActivity
                     for (int i =0; i < data.size(); i++){
                         String reprId = data.get(i).getId();
                         if(id.equals(reprId)){
-                            layoutManager.scrollToPositionWithOffset(i, 20);
+                            layoutManager.scrollToPositionWithOffset(i, 5);
                             Log.d("TAG LAT",marker.getPosition().latitude+"");
                             Log.d("TAG LONG",marker.getPosition().longitude+"");
+                            Log.d("TAG POS",i+"");
                             positionList = i;
                         }
                     }
@@ -352,7 +358,7 @@ public class MenuActivity extends AppCompatActivity
                         layoutManager.scrollToPositionWithOffset(2, 20);
                     }
                     */
-                    return false;
+                    return true;
                 }
             });
         new Http_GetReports(latitude,longitude).execute();
@@ -360,6 +366,12 @@ public class MenuActivity extends AppCompatActivity
 
 
     //----------------------------------------------------------------------------------------------
+
+    /**
+     * Convert a drawable into a bitmap
+     * @param drawable
+     * @return
+     */
     public static Bitmap drawableToBitmap(Drawable drawable) {
         Bitmap bitmap = null;
 
@@ -485,6 +497,10 @@ public class MenuActivity extends AppCompatActivity
                 holder.category_img.setImageResource(imageIDs[4]);
             }else if(category.equals(categories[5])){
                 holder.category_img.setImageResource(imageIDs[5]);
+            }else if(category.equals(categories[6])){
+                holder.category_img.setImageResource(imageIDs[6]);
+            }else if(category.equals(categories[7])){
+                holder.category_img.setImageResource(imageIDs[7]);
             }
 
             holder.itemView.setOnClickListener(new View.OnClickListener() {
@@ -535,6 +551,7 @@ public class MenuActivity extends AppCompatActivity
 
         View_Holder(View itemView) {
             super(itemView);
+            this.setIsRecyclable(false);
             title = (TextView) itemView.findViewById(R.id.title);
             description = (TextView) itemView.findViewById(R.id.description);
             state = (TextView) itemView.findViewById(R.id.state);
@@ -574,20 +591,43 @@ public class MenuActivity extends AppCompatActivity
 
             try
             {
+                String[] categories=getResources().getStringArray(R.array.categories);
                 //TO DO GET REPORTS
                 //----------------------------------------------------------------------------------
                 Thread.sleep(2000);
                 ret.add(new Report("id123", "Titulo del reportes lo suficientmente largo", "Esta es una descripción" +
                         " del reporte considerablemente larga, a manera de prueba." +
                         "La idea es ver que tal se ve en la UI. Descripción de prueba de id123.",
-                        "String address", "String referencePoint", 3.391318,
-                        0, -76.5238619, Report.PUBLISHED, "Acueducto y alcantarillado", "hoy", null));
+                        "String address", 3.391318,
+                        0, -76.5238619, Report.PUBLISHED, categories[0], "hoy", null));
+
                 ret.add(new Report("id124", "String title", "String description",
-                        "String address", "String referencePoint", 3.391318,
-                        0, -76.54386190000001, Report.IN_PROCESS, "Estado de las vias", "hoy", null));
+                        "String address", 3.391318,
+                        0, -76.54386190000001, Report.IN_PROCESS, categories[1], "hoy", null));
+
                 ret.add(new Report("id125", "String title", "String description",
-                        "String address", "String referencePoint", 3.4113179999999996,
-                        0, -76.54386190000001, Report.SOLVED, "Basura", "hoy", null));
+                        "String address", 3.4113179999999996,
+                        0, -76.54386190000001, Report.SOLVED, categories[2], "hoy", null));
+
+                ret.add(new Report("id126", "String title", "String description",
+                        "String address", 3.4113179999999996+0.002,
+                        0, -76.54386190000001-0.002, Report.SOLVED, categories[3], "hoy", null));
+
+                ret.add(new Report("id127", "String title", "String description",
+                        "String address", 3.4113179999999996-0.004,
+                        0, -76.54386190000001-0.0004, Report.SOLVED, categories[4], "hoy", null));
+
+                ret.add(new Report("id128", "String title", "String description",
+                        "String address", 3.391318+0.006,
+                        0, -76.5238619+0.006, Report.SOLVED, categories[5], "hoy", null));
+
+                ret.add(new Report("id129", "String title", "String description",
+                        "String address", 3.4113179999999996+0.008,
+                        0, -76.5438619000000-0.008, Report.SOLVED, categories[6], "hoy", null));
+
+                ret.add(new Report("id1210", "String title", "String description",
+                        "String address", 3.391318-0.001,
+                        0, -76.54386190000001-0.001, Report.SOLVED, categories[7], "hoy", null));
                 //----------------------------------------------------------------------------------
 
             } catch (Exception e)
@@ -613,16 +653,17 @@ public class MenuActivity extends AppCompatActivity
 
                 if(category.equals(categories[0])){
                     Bitmap b1 = drawableToBitmap(getResources().getDrawable(imageIDs[0]));
-                    Bitmap bhalfsize1 = Bitmap.createScaledBitmap(b1, b1.getWidth() / 4, b1.getHeight() / 4, false);
+                    Bitmap bhalfsize1 = Bitmap.createScaledBitmap(b1, b1.getWidth(), b1.getHeight(), false);
 
                     mMap.addMarker(new MarkerOptions().position(pos)
                             .title(rep.getId())
                             .snippet(rep.getTitle())
-                            .icon(BitmapDescriptorFactory.fromBitmap(bhalfsize1)));
+                            .icon(BitmapDescriptorFactory.fromBitmap(bhalfsize1)))
+                            .setInfoWindowAnchor(0,0);
 
                 }else if(category.equals(categories[1])){
                     Bitmap b1 = drawableToBitmap(getResources().getDrawable(imageIDs[1]));
-                    Bitmap bhalfsize1 = Bitmap.createScaledBitmap(b1, b1.getWidth() / 4, b1.getHeight() / 4, false);
+                    Bitmap bhalfsize1 = Bitmap.createScaledBitmap(b1, b1.getWidth(), b1.getHeight(), false);
 
                     mMap.addMarker(new MarkerOptions().position(pos)
                             .title(rep.getId())
@@ -631,7 +672,7 @@ public class MenuActivity extends AppCompatActivity
 
                 }else if(category.equals(categories[2])){
                     Bitmap b1 = drawableToBitmap(getResources().getDrawable(imageIDs[2]));
-                    Bitmap bhalfsize1 = Bitmap.createScaledBitmap(b1, b1.getWidth() / 4, b1.getHeight() / 4, false);
+                    Bitmap bhalfsize1 = Bitmap.createScaledBitmap(b1, b1.getWidth(), b1.getHeight(), false);
 
                     mMap.addMarker(new MarkerOptions().position(pos)
                             .title(rep.getId())
@@ -640,7 +681,7 @@ public class MenuActivity extends AppCompatActivity
 
                 }else if(category.equals(categories[3])){
                     Bitmap b1 = drawableToBitmap(getResources().getDrawable(imageIDs[3]));
-                    Bitmap bhalfsize1 = Bitmap.createScaledBitmap(b1, b1.getWidth() / 4, b1.getHeight() / 4, false);
+                    Bitmap bhalfsize1 = Bitmap.createScaledBitmap(b1, b1.getWidth(), b1.getHeight(), false);
 
                     mMap.addMarker(new MarkerOptions().position(pos)
                             .title(rep.getId())
@@ -649,7 +690,7 @@ public class MenuActivity extends AppCompatActivity
 
                 }else if(category.equals(categories[4])){
                     Bitmap b1 = drawableToBitmap(getResources().getDrawable(imageIDs[4]));
-                    Bitmap bhalfsize1 = Bitmap.createScaledBitmap(b1, b1.getWidth() / 4, b1.getHeight() / 4, false);
+                    Bitmap bhalfsize1 = Bitmap.createScaledBitmap(b1, b1.getWidth(), b1.getHeight(), false);
 
                     mMap.addMarker(new MarkerOptions().position(pos)
                             .title(rep.getId())
@@ -658,7 +699,25 @@ public class MenuActivity extends AppCompatActivity
 
                 }else if(category.equals(categories[5])){
                     Bitmap b1 = drawableToBitmap(getResources().getDrawable(imageIDs[5]));
-                    Bitmap bhalfsize1 = Bitmap.createScaledBitmap(b1, b1.getWidth() / 4, b1.getHeight() / 4, false);
+                    Bitmap bhalfsize1 = Bitmap.createScaledBitmap(b1, b1.getWidth(), b1.getHeight(), false);
+
+                    mMap.addMarker(new MarkerOptions().position(pos)
+                            .title(rep.getId())
+                            .snippet(rep.getTitle())
+                            .icon(BitmapDescriptorFactory.fromBitmap(bhalfsize1)));
+
+                }else if(category.equals(categories[6])){
+                    Bitmap b1 = drawableToBitmap(getResources().getDrawable(imageIDs[6]));
+                    Bitmap bhalfsize1 = Bitmap.createScaledBitmap(b1, b1.getWidth(), b1.getHeight(), false);
+
+                    mMap.addMarker(new MarkerOptions().position(pos)
+                            .title(rep.getId())
+                            .snippet(rep.getTitle())
+                            .icon(BitmapDescriptorFactory.fromBitmap(bhalfsize1)));
+
+                }else if(category.equals(categories[7])){
+                    Bitmap b1 = drawableToBitmap(getResources().getDrawable(imageIDs[7]));
+                    Bitmap bhalfsize1 = Bitmap.createScaledBitmap(b1, b1.getWidth(), b1.getHeight(), false);
 
                     mMap.addMarker(new MarkerOptions().position(pos)
                             .title(rep.getId())

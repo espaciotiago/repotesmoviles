@@ -11,19 +11,18 @@ public class Report implements Serializable{
     public final static String IN_PROCESS="En tramite";
     public final static String SOLVED="Solucionado";
 
-    private String id,title,description,address,referencePoint,status,category,date;
+    private String id,title,description,address,status,category,date;
     private int supports;
     private double latitude,longitude;
     private ArrayList<String> images;
 
     public Report(String id, String title, String description,
-                  String address, String referencePoint, double latitude,int supports,
+                  String address, double latitude,int supports,
                   double longitude, String status, String category,String date,ArrayList<String>  images) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.address = address;
-        this.referencePoint = referencePoint;
         this.latitude = latitude;
         this.longitude = longitude;
         this.supports = supports;
@@ -63,14 +62,6 @@ public class Report implements Serializable{
 
     public void setAddress(String address) {
         this.address = address;
-    }
-
-    public String getReferencePoint() {
-        return referencePoint;
-    }
-
-    public void setReferencePoint(String referencePoint) {
-        this.referencePoint = referencePoint;
     }
 
     public double getLatitude() {

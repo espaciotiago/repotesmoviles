@@ -19,12 +19,16 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import utilities.DBHelper;
 import utilities.User;
 
 public class ProfileActivity extends AppCompatActivity implements EditProfileDialogFragment.OnaEditProfileSelected{
 
-    private TextView name,mail,idNumber,phone,place;
+    private TextView name,mail,idNumber,phone;
     private ImageView picture;
+
+    private DBHelper db;
+    private User user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,13 +41,26 @@ public class ProfileActivity extends AppCompatActivity implements EditProfileDia
         final Drawable upArrow = getResources().getDrawable(R.drawable.abc_ic_ab_back_mtrl_am_alpha);
         upArrow.setColorFilter(getResources().getColor(R.color.colorAccent), PorterDuff.Mode.SRC_ATOP);
         getSupportActionBar().setHomeAsUpIndicator(upArrow);
+        //Database ---------------------------------------------------------------------------------
+        db=new DBHelper(this);
+        user = db.userExists();
         //------------------------------------------------------------------------------------------
         name=(TextView)findViewById(R.id.name);
         mail=(TextView)findViewById(R.id.mail);
         phone=(TextView)findViewById(R.id.phone);
         idNumber=(TextView)findViewById(R.id.id_number);
-        place=(TextView)findViewById(R.id.place);
         picture=(ImageView)findViewById(R.id.pic);
+
+        name.setText(user.getName());
+        mail.setText(user.getMail());
+        phone.setText(user.getPhone());
+        idNumber.setText(user.getId());
+        if(user.getImage()!=null && !user.getImage().equals("")){
+            byte[] decodedString = Base64.decode(user.getImage(), Base64.NO_PADDING);
+            Bitmap imag = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+            picture.setImageBitmap(imag);
+
+        }
 
     }
 
@@ -66,25 +83,20 @@ public class ProfileActivity extends AppCompatActivity implements EditProfileDia
             String nam=name.getText().toString();
             String idNum=idNumber.getText().toString();
             String pho=phone.getText().toString();
-            String plc=place.getText().toString();
 
-            EditProfileDialogFragment newFragment;
-            FragmentManager fragmentManager = getSupportFragmentManager();
-            newFragment = EditProfileDialogFragment.newInstance(nam,idNum,pho,plc,"");
-            FragmentTransaction transaction = fragmentManager.beginTransaction();
-            transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-            transaction.add(android.R.id.content, newFragment).addToBackStack(null).commit();
+            FragmentManager fm = getSupportFragmentManager();
+            EditProfileDialogFragment dialog = EditProfileDialogFragment.newInstance(nam,idNum,pho,user.getImage());
+            dialog.show(fm, "dialog");
         }
 
         return super.onOptionsItemSelected(item);
     }
 
     @Override
-    public void onEditProfileSelectedListener(String name, String idNum, String phone, String place, String newPicture) {
+    public void onEditProfileSelectedListener(String name, String idNum, String phone, String newPicture) {
         this.name.setText(name);
         this.idNumber.setText(idNum);
         this.phone.setText(phone);
-        this.place.setText(place);
 
         Bitmap imag = null;
         if(!newPicture.equals("") && newPicture!=null){

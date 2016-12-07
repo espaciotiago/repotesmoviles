@@ -2,16 +2,28 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
+        android:id="@+id/action_notifications"
+        android:icon="@drawable/ic_mode_comment_white_48dp"
+        android:orderInCategory="100"
+        android:title="@string/my_reports"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/action_report"
-        android:icon="@drawable/add"
+        android:icon="@drawable/ic_note_add_white_48dp"
         android:orderInCategory="100"
         android:title="@string/action_report"
-        app:showAsAction="always" />
+        app:showAsAction="never" />
     <item
-        android:id="@+id/action_notifications"
-        android:icon="@drawable/nofications"
+        android:id="@+id/action_about"
+        android:icon="@drawable/ic_note_add_white_48dp"
         android:orderInCategory="100"
-        android:title="@string/action_notification"
-        app:showAsAction="always" />
+        android:title="@string/about"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_close"
+        android:icon="@drawable/ic_note_add_white_48dp"
+        android:orderInCategory="100"
+        android:title="@string/close"
+        app:showAsAction="never" />
 
 </menu>

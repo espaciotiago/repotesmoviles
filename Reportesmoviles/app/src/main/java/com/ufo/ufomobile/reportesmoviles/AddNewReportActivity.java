@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -39,6 +40,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
 
+import utilities.Constants;
 import utilities.Report;
 
 public class AddNewReportActivity extends AppCompatActivity implements AddressPickerDialogFragment.OnaAddSelected {
@@ -47,13 +49,17 @@ public class AddNewReportActivity extends AppCompatActivity implements AddressPi
     private double latitude,longitude;
 
     private ImageView categoryImg;
-    private EditText title,description,address,referencePoint;
+    private ImageButton addImage;
+    private EditText title,description,address;
     private Button send;
     private ScrollView scrollView;
     private ImageButton mapview;
     private String categoryName;
+    RecyclerView myList;
     Recycler_View_Adapter adapter;
     List<Bitmap> data;
+    ArrayList<String> images = new ArrayList<String>();
+    ArrayList<String> imagesName = new ArrayList<String>();
 
     int total_imgs;
     @Override
@@ -70,17 +76,14 @@ public class AddNewReportActivity extends AppCompatActivity implements AddressPi
         title=(EditText)findViewById(R.id.title);
         description=(EditText)findViewById(R.id.description);
         address=(EditText)findViewById(R.id.address);
-        referencePoint=(EditText)findViewById(R.id.reference_point);
+        addImage = (ImageButton) findViewById(R.id.add_image);
 
         address.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AddressPickerDialogFragment newFragment;
-                FragmentManager fragmentManager = getSupportFragmentManager();
-                newFragment = new AddressPickerDialogFragment();
-                FragmentTransaction transaction = fragmentManager.beginTransaction();
-                transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-                transaction.add(android.R.id.content, newFragment).addToBackStack(null).commit();
+                FragmentManager fm = getSupportFragmentManager();
+                AddressPickerDialogFragment dialog = AddressPickerDialogFragment.newInstance(categoryResource);
+                dialog.show(fm, "dialog");
             }
         });
 
@@ -89,7 +92,7 @@ public class AddNewReportActivity extends AppCompatActivity implements AddressPi
             @Override
             public void onClick(View view) {
                 FragmentManager fm = getSupportFragmentManager();
-                AddressPickerDialogFragment dialog = AddressPickerDialogFragment.newInstance();
+                AddressPickerDialogFragment dialog = AddressPickerDialogFragment.newInstance(categoryResource);
                 dialog.show(fm, "dialog");
             }
         });
@@ -107,14 +110,26 @@ public class AddNewReportActivity extends AppCompatActivity implements AddressPi
             }
         });
 
+        addImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(total_imgs<4) {
+                    Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                    startActivityForResult(takePicture, 0);
+                }else{
+                    Toast.makeText(getApplicationContext(),
+                            "Número máximo de imagenes alcanzado",Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
 
         //Horizontal list -------------------------------------------------------------------------
         //----------------------------------------------------------------------------------------
         data = new ArrayList<Bitmap>();
-        data.add(null);
         //----------------------------------------------------------------------------------------
         LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
-        RecyclerView myList = (RecyclerView) findViewById(R.id.img_recycler_view);
+        myList = (RecyclerView) findViewById(R.id.img_recycler_view);
         adapter = new Recycler_View_Adapter(data, getApplication());
         myList.setAdapter(adapter);
         myList.setLayoutManager(layoutManager);
@@ -127,20 +142,20 @@ public class AddNewReportActivity extends AppCompatActivity implements AddressPi
                 String tit=title.getText().toString();
                 String desc=description.getText().toString();
                 String addr=address.getText().toString();
-                String ref=referencePoint.getText().toString();
                 DateFormat df = new SimpleDateFormat("EEE, d MMM yyyy, HH:mm");
                 String date = df.format(Calendar.getInstance().getTime());
-                ArrayList<String> images = new ArrayList<String>();
 
-                for(int i =0;i<data.size()-1;i++){
-                    Bitmap img = data.get(i);
-                    String imgStr = getStringImage(img);
-                    images.add(imgStr);
+
+                //Populate the array of string images
+                for(int i =0;i<data.size();i++){
+                    Log.d("NAME IMAGE",imagesName.get(i));
+                    Log.d("STRING IMAGE",images.get(i));
                 }
 
 
-                if(!tit.equals("") && !desc.equals("") && !addr.equals("") && !ref.equals("")){
-                    Report report = new Report("00",tit,desc,addr,ref,
+                if(!tit.equals("") && !desc.equals("") && !addr.equals("")){
+                    //Creates the new report
+                    Report report = new Report("00",tit,desc,addr,
                             latitude,0,longitude,Report.PUBLISHED,categoryName,date,images);
                     //TODO Enviar reporte
                     Toast.makeText(getApplicationContext(),
@@ -154,10 +169,16 @@ public class AddNewReportActivity extends AppCompatActivity implements AddressPi
 
         //Open the dialog at first
         FragmentManager fm = getSupportFragmentManager();
-        AddressPickerDialogFragment dialog = AddressPickerDialogFragment.newInstance();
+        AddressPickerDialogFragment dialog = AddressPickerDialogFragment.newInstance(categoryResource);
         dialog.show(fm, "dialog");
     }
 
+    /**
+     *
+     * @param requestCode
+     * @param resultCode
+     * @param imageReturnedIntent
+     */
     protected void onActivityResult(int requestCode, int resultCode, Intent imageReturnedIntent) {
         super.onActivityResult(requestCode, resultCode, imageReturnedIntent);
         switch(requestCode) {
@@ -168,7 +189,11 @@ public class AddNewReportActivity extends AppCompatActivity implements AddressPi
                         Bitmap bp = decodeUri(getApplicationContext(), selectedImage);
                         int w=256;
                         int h=256;
-                        adapter.insert(0, Bitmap.createScaledBitmap(bp, w, h, false));
+                        Bitmap thumbImage = ThumbnailUtils.extractThumbnail(bp,w,h);
+                        adapter.insert(adapter.getItemCount(), thumbImage);
+                        //myList.scrollToPosition(adapter.getItemCount());
+                        // TODO: 15/11/16 agregar imagen a arreglo de imagenes
+                        //data.add(bp);
                         total_imgs++;
                     }catch (Exception e){
                         e.printStackTrace();
@@ -199,7 +224,7 @@ public class AddNewReportActivity extends AppCompatActivity implements AddressPi
 
     public String getStringImage(Bitmap bmp){
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bmp.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        bmp.compress(Bitmap.CompressFormat.JPEG, 30, baos);
         byte[] imageBytes = baos.toByteArray();
         String encodedImage = Base64.encodeToString(imageBytes, Base64.DEFAULT);
         return encodedImage;
@@ -243,8 +268,17 @@ public class AddNewReportActivity extends AppCompatActivity implements AddressPi
              //Use the provided View Holder on the onCreateViewHolder method to populate the current row on the RecyclerView
             if(list.get(position)!=null){
                 holder.image.setImageBitmap(list.get(position));
+                holder.delete.setVisibility(View.VISIBLE);
+                holder.delete.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        adapter.remove(position);
+                    }
+                });
             }
+            /*
             else{
+                holder.delete.setVisibility(View.GONE);
                 holder.image.setBackgroundResource(R.drawable.add_image_background);
                 holder.image.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -256,11 +290,12 @@ public class AddNewReportActivity extends AppCompatActivity implements AddressPi
                             startActivityForResult(takePicture, 0);
                         }else{
                             Toast.makeText(getApplicationContext(),
-                                    "Númer máximo de imagenes alcanzado",Toast.LENGTH_SHORT).show();
+                                    "Número máximo de imagenes alcanzado",Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
             }
+            */
             //holder.image.setText(list.get(position).getTitle());
 
             //animate(holder);
@@ -280,15 +315,24 @@ public class AddNewReportActivity extends AppCompatActivity implements AddressPi
 
         // Insert a new item to the RecyclerView on a predefined position
         public void insert(int position, Bitmap data) {
+            // TODO: 15/11/16 agregar imagen a arreglo de imagenes
             list.add(position, data);
+            images.add(Constants.getStringImage(data));
+            imagesName.add(Constants.giverImageName(Constants.IMG_CONS_REP));
             notifyItemInserted(position);
         }
 
         // Remove a RecyclerView item containing a specified Data object
-        public void remove(String data) {
-            int position = list.indexOf(data);
+        public void remove(int position) {
+            //int position = list.indexOf(data);
+            // TODO: 15/11/16 elimiar imagen de arreglo de imagenes
+            Log.d("POS DEL",position+"");
+            total_imgs--;
             list.remove(position);
+            images.remove(position);
+            imagesName.remove(position);
             notifyItemRemoved(position);
+
         }
 
     }
@@ -296,11 +340,12 @@ public class AddNewReportActivity extends AppCompatActivity implements AddressPi
     //Auxiliar class holder ------------------------------------------------------------------------
     public class View_Holder extends RecyclerView.ViewHolder {
 
-        ImageView image;
+        ImageView image,delete;
 
         View_Holder(View itemView) {
             super(itemView);
             image = (ImageView) itemView.findViewById(R.id.image);
+            delete = (ImageView) itemView.findViewById(R.id.delete_btn);
         }
     }
 

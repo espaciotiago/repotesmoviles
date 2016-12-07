@@ -84,7 +84,7 @@ public class AddressViewDialogFragment extends DialogFragment implements OnMapRe
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         Bitmap b1 = drawableToBitmap(getResources().getDrawable(resource));
-        Bitmap bhalfsize1 = Bitmap.createScaledBitmap(b1, b1.getWidth() / 4, b1.getHeight() / 4, false);
+        Bitmap bhalfsize1 = Bitmap.createScaledBitmap(b1, b1.getWidth(), b1.getHeight(), false);
         LatLng latLng = new LatLng(latitude,longitude);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 13));
         mMap.addMarker(new MarkerOptions().position(latLng)

@@ -7,6 +7,8 @@
     <string name="action_notification">Notificaciones</string>
     <string name="action_report">Reportar</string>
     <string name="action_edit">Editar perfil</string>
+    <string name="getting_data">Obteniendo información</string>
+    <string name="sending_data">Enviando información</string>
 
     <string name="new_report">PRESIONE EL ICONO PARA REPORTAR</string>
     <string name="add_new_report">Reportar</string>
@@ -17,7 +19,7 @@
     <string name="description_hint">Descripción</string>
     <string name="address_hint">Dirección</string>
     <string name="point_hint">Punto de referencia</string>
-    <string name="add_image_hint">AÑADIR IMAGENES</string>
+    <string name="add_image_hint">Subir Foto</string>
     <string name="related_images">IMAGENES RELACIONADAS</string>
     <string name="send">ENVIAR REPORTE</string>
     <string name="sended_at">ENVIADO:</string>
@@ -30,6 +32,13 @@
     <string name="signup">REGISTRO</string>
     <string name="start">comenzar</string>
     <string name="done">HECHO</string>
+    <string name="next">Continuar</string>
+    <string name="like">Apoyar</string>
+    <string name="comment">Comentar</string>
+
+    <string name="reports">Reportes</string>
+    <string name="likes">Apoyos</string>
+    <string name="comments">Comentarios</string>
 
     <string name="mail_hint">Correo electronico</string>
     <string name="password_hint">Contraseña</string>
@@ -41,7 +50,9 @@
     <string name="gender_hint">Género</string>
     <string name="male">Masculino</string>
     <string name="female">Femenino</string>
-    <string name="agree">He leido y acepto los</string>
+    <string name="male_id">M</string>
+    <string name="female_id">F</string>
+    <string name="agree">He leido y acepto los Terminos y condiciones</string>
     <string name="termns">Terminos y condiciones</string>
     <string-array name="gender_list">
         <item>Género</item>
@@ -49,37 +60,59 @@
         <item>Femenino</item>
     </string-array>
 
+    <string name="select_category_title">Crear nuevo reporte</string>
+    <string name="select_category">Seleccione la categoria de su nuevo reporte</string>
+
     <string name="incomplete_info_error">Debe llenar todos los campos para continuar</string>
     <string name="agreement_error">Debe aceptar los terminos y condiciones para continuar</string>
     <string name="no_match_password_error">Las contraseñas no coinciden</string>
     <string name="address_no_selected_error">No ha seleccionado ninguna dirección</string>
+    <string name="field_required_error">Por favor complete la información</string>
+    <string name="bad_connection_error">No se ha podido establecer la conexión, por favor verifique su conexión o intente más tarde</string>
+    <string name="general_error">Lo sentimos, ha ocurrido un error inesperado</string>
+
+
     <!--
     Report categories
     -->
     <string-array name="categories">
         <item>Acueducto y alcantarillado</item>
-        <item>Estado de las vias</item>
-        <item>Basura</item>
-        <item>Semaforización</item>
-        <item>Señalización</item>
-        <item>Otro</item>
-
-        <item>Transito</item>
+        <item>Recolección de basuras</item>
+        <item>Semaforización y Señalización</item>
         <item>Espacio público</item>
         <item>Infraestructura y vias</item>
         <item>Protección animal</item>
         <item>Seguridad</item>
+        <item>Otro</item>
     </string-array>
-    <string name="aqueduct">Acueducto y alcantarillado</string>
-    <string name="roads">Estado de las vias</string>
-    <string name="garbage">Basura</string>
-    <string name="traffic_lights">Semaforización</string>
-    <string name="signs">Señalización</string>
-    <string name="other">Otro</string>
 
-    <string name="title_activity_add_new_report">AddNewReportActivity</string>
+    <!-- Report categories ids -->
+    <string-array name="categoriesStr">
+        <item>Acueducto y alcantarillado</item>
+        <item>Recolección de basuras</item>
+        <item>Semaforización y Señalización</item>
+        <item>Espacio público</item>
+        <item>Infraestructura y vias</item>
+        <item>Protección animal</item>
+        <item>Seguridad</item>
+        <item>Otro</item>
+    </string-array>v
+
+    <string name="all">Todas</string>
+    <string name="aqueduct">Acueducto y alcantarillado</string>
+    <string name="roads">Infraestructura y vias</string>
+    <string name="garbage">Recolección de basuras</string>
+    <string name="traffic">Semaforización y Señalización</string>
+    <string name="public_space">Espacio público</string>
+    <string name="animal">Protección animal</string>
+    <string name="security">Seguridad</string>
+    <string name="other">Otro</string>
+    <string name="close">Cerrar Sesion</string>
+    <string name="about">Acerca de</string>
+
+    <string name="title_activity_add_new_report">Añade tu reporte</string>
     <string name="title_activity_report_description">ReportDescriptionActivity</string>
-    <string name="title_activity_notifications">NotificationsActivity</string>
+    <string name="title_activity_notifications">Mis reportes</string>
     <string name="title_activity_initial">InitialActivity</string>
     <string name="title_activity_login">Inicio de sesion</string>
     <string name="title_activity_sign_up">SignUpActivity</string>

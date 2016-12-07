@@ -6,15 +6,14 @@ import java.io.Serializable;
  * Created by smartin on 27/06/2016.
  */
 public class User implements Serializable{
-    private String name,mail,password,phone,id,town,gender,image;
+    private String name,mail,password,phone,id,gender,image;
 
-    public User(String name, String mail, String password, String phone, String id, String town,String gender,String image) {
+    public User(String name, String mail, String password, String phone, String id,String gender,String image) {
         this.name = name;
         this.mail = mail;
         this.password = password;
         this.phone = phone;
         this.id = id;
-        this.town = town;
         this.gender = gender;
         this.image = image;
     }
@@ -57,14 +56,6 @@ public class User implements Serializable{
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    public String getTown() {
-        return town;
-    }
-
-    public void setTown(String town) {
-        this.town = town;
     }
 
     public String getGender() {

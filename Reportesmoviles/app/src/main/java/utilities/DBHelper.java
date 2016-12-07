@@ -12,23 +12,23 @@ import android.util.Log;
  */
 public class DBHelper extends SQLiteOpenHelper {
     //----------------------------------------------------------------------------------------------------------------
-    //Informacion de la bd
+    //DB info
     //----------------------------------------------------------------------------------------------------------------
     private static final String LOG="DatabaseHelper";
     private static final int DATABASE_VERSION=1;
     private static final String DATABASE_NAME="reporteCiudadano";
     //----------------------------------------------------------------------------------------------------------------
-    //Nombres de las tablas
+    //Table's names
     //----------------------------------------------------------------------------------------------------------------
     public static final String TABLE_USER="User";
 
     //----------------------------------------------------------------------------------------------------------------
-    //Sentencias de creacion de tablas
+    //Creation querys
     //----------------------------------------------------------------------------------------------------------------
     public static final String CREATE_TABLE_USER="CREATE TABLE "
             + TABLE_USER + "(name TEXT, mail TEXT, password TEXT, phone TEXT, id TEXT, town TEXT, gender TEXT, image TEXT)";
     //----------------------------------------------------------------------------------------------------------------
-    //Metodos de la bd
+    //METHODS
     //----------------------------------------------------------------------------------------------------------------
 
     public DBHelper(Context context) {
@@ -46,6 +46,7 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS "+TABLE_USER);
     }
 
+    //Get the existen user
     public User userExists(){
         User user=null;
         SQLiteDatabase db=this.getReadableDatabase();
@@ -63,7 +64,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 String gender = c.getString(c.getColumnIndex("gender"));
                 String image = c.getString(c.getColumnIndex("image"));
 
-                user = new User(name,mail,password,phone,id,town,gender,image);
+                user = new User(name,mail,password,phone,id,gender,image);
 
             }
             return user;
@@ -72,6 +73,7 @@ public class DBHelper extends SQLiteOpenHelper {
         }
     }
 
+    //Create a new user
     public String createUser(User user){
         User existe=userExists();
         if(existe==null) {
@@ -82,7 +84,7 @@ public class DBHelper extends SQLiteOpenHelper {
             values.put("password", user.getPassword());
             values.put("phone", user.getPhone());
             values.put("id", user.getId());
-            values.put("town", user.getTown());
+            values.put("town", "");
             values.put("gender", user.getGender());
             values.put("image", user.getImage());
 
@@ -93,6 +95,7 @@ public class DBHelper extends SQLiteOpenHelper {
         }
     }
 
+    //Update a user
     public void updateUser(String name, String idNum,String phone,String place,String picture,String mail){
 
         SQLiteDatabase db = this.getReadableDatabase();
@@ -105,6 +108,7 @@ public class DBHelper extends SQLiteOpenHelper {
         db.update(TABLE_USER, values, "mail = ?", new String[]{mail});
     }
 
+    //Delete user
     public void deleteUser(){
         SQLiteDatabase db=this.getReadableDatabase();
         db.delete(TABLE_USER,null,null);

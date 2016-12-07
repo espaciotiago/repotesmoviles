@@ -128,28 +128,6 @@
             <LinearLayout
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:alpha="0.8"
-                android:layout_gravity="center_horizontal" >
-
-                <ImageView
-                    android:layout_width="48dp"
-                    android:layout_height="match_parent"
-                    android:id="@+id/imageView16"
-                    android:src="@drawable/place_b" />
-
-                <EditText
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:ems="10"
-                    android:hint="@string/place_hint"
-                    android:id="@+id/place"
-                    android:theme="@style/MyEditTextTheme" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:orientation="horizontal"
-                android:layout_width="match_parent"
                 android:layout_height="48dp"
                 android:alpha="0.8"
                 android:layout_gravity="center_horizontal" >

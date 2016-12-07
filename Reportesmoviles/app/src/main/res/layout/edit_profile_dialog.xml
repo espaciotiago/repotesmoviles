@@ -1,37 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:focusableInTouchMode="true"
+    android:focusable="false">
 
     <RelativeLayout
-        android:layout_width="294dp"
-        android:layout_height="402dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:id="@+id/scrollView2"
-        android:background="@drawable/round_shape"
         android:paddingBottom="@dimen/activity_vertical_margin"
         android:paddingLeft="@dimen/activity_horizontal_margin"
         android:paddingRight="@dimen/activity_horizontal_margin"
         android:paddingTop="@dimen/activity_vertical_margin"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true">
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true">
 
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:id="@+id/linearLayout10">
 
-            <de.hdodenhof.circleimageview.CircleImageView
-                xmlns:app="http://schemas.android.com/apk/res-auto"
-                android:id="@+id/pic"
-                android:layout_width="90dp"
-                android:layout_height="100dp"
-                android:paddingTop="@dimen/nav_header_vertical_spacing"
-                android:src="@drawable/profile_pic"
-                app:civ_border_width="2dp"
-                app:civ_border_color="@color/colorAccent"
-                android:layout_alignParentTop="true"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true" />
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <de.hdodenhof.circleimageview.CircleImageView
+                    xmlns:app="http://schemas.android.com/apk/res-auto"
+                    android:id="@+id/pic"
+                    android:layout_width="90dp"
+                    android:layout_height="100dp"
+                    android:paddingTop="@dimen/nav_header_vertical_spacing"
+                    android:src="@drawable/profile_pic"
+                    app:civ_border_width="2dp"
+                    app:civ_border_color="@color/colorAccent"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true" />
+
+                <ImageView
+                    android:layout_width="48dp"
+                    android:layout_height="32dp"
+                    android:src="@drawable/edit_blue"
+                    android:id="@+id/imageView2"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignRight="@+id/pic"
+                    android:layout_alignEnd="@+id/pic" />
+            </RelativeLayout>
 
             <LinearLayout
                 android:orientation="horizontal"
@@ -65,28 +84,6 @@
                 <ImageView
                     android:layout_width="48dp"
                     android:layout_height="match_parent"
-                    android:id="@+id/imageView12"
-                    android:src="@drawable/id_b" />
-
-                <EditText
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:ems="10"
-                    android:hint="@string/id_hint"
-                    android:id="@+id/id_number"
-                    android:theme="@style/MyEditTextTheme" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:orientation="horizontal"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:alpha="0.8"
-                android:layout_gravity="center_horizontal">
-
-                <ImageView
-                    android:layout_width="48dp"
-                    android:layout_height="match_parent"
                     android:id="@+id/imageView13"
                     android:src="@drawable/phone_b" />
 
@@ -99,34 +96,6 @@
                     android:theme="@style/MyEditTextTheme" />
             </LinearLayout>
 
-            <LinearLayout
-                android:orientation="horizontal"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:alpha="0.8"
-                android:layout_gravity="center_horizontal" >
-
-                <ImageView
-                    android:layout_width="48dp"
-                    android:layout_height="match_parent"
-                    android:id="@+id/imageView16"
-                    android:src="@drawable/place_b" />
-
-                <EditText
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:ems="10"
-                    android:hint="@string/place_hint"
-                    android:id="@+id/place"
-                    android:theme="@style/MyEditTextTheme" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:orientation="vertical"
-                android:layout_width="match_parent"
-                android:layout_height="16dp"
-                android:layout_gravity="right"></LinearLayout>
-
         </LinearLayout>
 
         <Button
@@ -136,9 +105,11 @@
             android:background="@drawable/button_background"
             android:textColor="#FFF"
             android:id="@+id/done"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true" />
+            android:textStyle="bold"
+            android:layout_below="@+id/linearLayout10"
+            android:layout_alignLeft="@+id/linearLayout10"
+            android:layout_alignStart="@+id/linearLayout10"
+            android:layout_marginTop="16dp" />
     </RelativeLayout>
 
 </RelativeLayout>

@@ -6,6 +6,10 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -13,24 +17,33 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentTransaction;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -51,10 +64,12 @@ public class AddressPickerDialogFragment extends DialogFragment implements OnMap
     private SupportMapFragment fragment;
     private EditText address;
     private ImageButton addAddress;
+    private Button btnNext;
     LocationManager locationManager;
     double longitude,latitude,longitude_rep,latitude_rep=0;
     private LatLng latiLong;
     private MarkerOptions markerOptions;
+    private int categoryResource;
     OnaAddSelected mListener;
 
     public interface OnaAddSelected {
@@ -65,14 +80,36 @@ public class AddressPickerDialogFragment extends DialogFragment implements OnMap
         fragment = new SupportMapFragment();
     }
 
+    public static AddressPickerDialogFragment newInstance(int resource){
+        Bundle args = new Bundle();
+        args.putInt("resource",resource);
+        AddressPickerDialogFragment f = new AddressPickerDialogFragment();
+        f.setArguments(args);
+        return f;
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+        getDialog().setCanceledOnTouchOutside(true);
+        getDialog().getWindow().requestFeature(Window.FEATURE_NO_TITLE);
         // Inflate the layout to use as dialog or embedded fragment
         View view=inflater.inflate(R.layout.address_picker_dialog, container, false);
+        return view;
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        categoryResource = getArguments().getInt("resource");
+
         address = (EditText) view.findViewById(R.id.address);
+        btnNext = (Button) view.findViewById(R.id.btn_next); 
         addAddress = (ImageButton) view.findViewById(R.id.add_address);
-        addAddress.setOnClickListener(new View.OnClickListener() {
+        
+        btnNext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String addr=address.getText().toString();
@@ -85,11 +122,40 @@ public class AddressPickerDialogFragment extends DialogFragment implements OnMap
                 }
             }
         });
+
+        //Click on enter
+        address.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                // If the event is a key-down event on the "enter" button
+                if ((event.getAction() == KeyEvent.ACTION_DOWN) &&
+                        (keyCode == KeyEvent.KEYCODE_ENTER)) {
+                    hideKeyboard();
+                    // Search the address
+                    String addr=address.getText().toString();
+                    new GeocoderTask().execute(addr);
+                    return true;
+                }
+                return false;
+            }
+        });
+
+        //Click on btn marker map
+        addAddress.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                hideKeyboard();
+                // Search the address
+                String addr=address.getText().toString();
+                new GeocoderTask().execute(addr);
+            }
+        });
         //Map ---------------------------------------------------------------------------------
         FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
         transaction.add(R.id.mapView, fragment).commit();
         fragment.getMapAsync(this);
-        return view;
+        getDialog().getWindow().setSoftInputMode(
+                WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
     }
 
     @Override
@@ -103,18 +169,10 @@ public class AddressPickerDialogFragment extends DialogFragment implements OnMap
     }
 
     @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-        // The only reason you might override this method when using onCreateView() is
-        // to modify any dialog characteristics. For example, the dialog includes a
-        // title by default, but your custom layout might not need it. So here you can
-        // remove the dialog title, but you must call the superclass to get the Dialog.
-        Dialog dialog = super.onCreateDialog(savedInstanceState);
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        return dialog;
-    }
-
-    @Override
     public void onMapReady(GoogleMap googleMap) {
+        Bitmap b1 = drawableToBitmap(getResources().getDrawable(categoryResource));
+        Bitmap bhalfsize1 = Bitmap.createScaledBitmap(b1, b1.getWidth(), b1.getHeight(), false);
+
         mMap = googleMap;
         if (ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getActivity(), android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
@@ -179,7 +237,6 @@ public class AddressPickerDialogFragment extends DialogFragment implements OnMap
                 try {
                     addresses = geocoder.getFromLocation(newLoc.latitude,newLoc.longitude, 1);
                     address.setText(addresses.get(0).getAddressLine(0) + " " + addresses.get(0).getAddressLine(1));
-                    address.setEnabled(false);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -188,7 +245,7 @@ public class AddressPickerDialogFragment extends DialogFragment implements OnMap
         });
 
         mMap.addMarker(new MarkerOptions().position(latLng)
-                .draggable(true));
+                .draggable(true)).setIcon(BitmapDescriptorFactory.fromBitmap(bhalfsize1));
         //Camera ---------------------------------------------------------------
         CameraPosition cameraPosition = new CameraPosition.Builder()
                 .target(latLng)
@@ -199,7 +256,6 @@ public class AddressPickerDialogFragment extends DialogFragment implements OnMap
     }
 
     public void find_Location(Context con) {
-        Log.d("Find Location", "in find_location");
         String location_context = Context.LOCATION_SERVICE;
         locationManager = (LocationManager) con.getSystemService(location_context);
         List<String> providers = locationManager.getProviders(true);
@@ -238,8 +294,51 @@ public class AddressPickerDialogFragment extends DialogFragment implements OnMap
         }
     }
 
+    /**
+     * Hide the keyboard
+     */
+    private void hideKeyboard(){
+
+        View v = getActivity().getCurrentFocus();
+
+        if(v != null) {
+            InputMethodManager inputMethodManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            inputMethodManager.hideSoftInputFromWindow(v.getWindowToken(), 0);
+        }
+    }
+
+    /**
+     * Convert a drawable into a bitmap
+     * @param drawable
+     * @return
+     */
+    public static Bitmap drawableToBitmap(Drawable drawable) {
+        Bitmap bitmap = null;
+
+        if (drawable instanceof BitmapDrawable) {
+            BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
+            if (bitmapDrawable.getBitmap() != null) {
+                return bitmapDrawable.getBitmap();
+            }
+        }
+
+        if (drawable.getIntrinsicWidth() <= 0 || drawable.getIntrinsicHeight() <= 0) {
+            bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888); // Single color bitmap will be created of 1x1 pixel
+        } else {
+            bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        }
+
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+        return bitmap;
+    }
+
     //Address search task --------------------------------------------------------------------------
 
+    /**
+     * Searching the address
+     */
     private class GeocoderTask extends AsyncTask<String, Void, List<Address>> {
 
         @Override
@@ -263,7 +362,8 @@ public class AddressPickerDialogFragment extends DialogFragment implements OnMap
             if(addresses==null || addresses.size()==0){
                 Toast.makeText(getActivity().getBaseContext(), "Dirección no encontrada", Toast.LENGTH_SHORT).show();
             }else {
-
+                Bitmap b1 = drawableToBitmap(getResources().getDrawable(categoryResource));
+                Bitmap bhalfsize1 = Bitmap.createScaledBitmap(b1, b1.getWidth(), b1.getHeight(), false);
                 // Clears all the existing markers on the map
                 mMap.clear();
 
@@ -282,6 +382,7 @@ public class AddressPickerDialogFragment extends DialogFragment implements OnMap
                     markerOptions = new MarkerOptions();
                     markerOptions.position(latiLong);
                     markerOptions.draggable(true);
+                    markerOptions.icon(BitmapDescriptorFactory.fromBitmap(bhalfsize1));
 
                     mMap.addMarker(markerOptions);
 

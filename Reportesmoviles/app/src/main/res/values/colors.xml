@@ -10,6 +10,8 @@
     <color name="colorSolved">#1BCC45</color>
     <color name="colorInPorcess">#FF7800</color>
     <color name="colorNotification">#EFC618</color>
-    <color name="transparentBlack">#58000000</color>
+    <color name="transparentBlack">#28000000</color>
+    <color name="transparentBlackDark">#000000</color>
+    <color name="blackAl">#212121</color>
     <color name="withe">#FFFF</color>
 </resources>

@@ -5,8 +5,9 @@
     android:focusableInTouchMode="true"
     android:focusable="false">
 
-    <RelativeLayout
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/scrollView2"
         android:paddingBottom="@dimen/activity_vertical_margin"
@@ -98,6 +99,103 @@
 
         </LinearLayout>
 
+        <LinearLayout
+            android:id="@+id/restore_layout"
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="match_parent"
+                android:id="@+id/expand_btn"
+                android:src="@drawable/ic_expand_more_white_48dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/restore_password"
+                android:id="@+id/textView5" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="10dp"
+            android:id="@+id/password_layout">
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:alpha="0.8"
+                android:layout_gravity="center_horizontal" >
+
+                <ImageView
+                    android:layout_width="48dp"
+                    android:layout_height="match_parent"
+                    android:id="@+id/imageView3"
+                    android:src="@drawable/pass_b" />
+
+                <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:hint="@string/password_hint"
+                    android:id="@+id/edit_password"
+                    android:inputType="textPassword"
+                    android:theme="@style/MyEditTextTheme" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:alpha="0.8"
+                android:layout_gravity="center_horizontal" >
+
+                <ImageView
+                    android:layout_width="48dp"
+                    android:layout_height="match_parent"
+                    android:id="@+id/imageView16"
+                    android:src="@drawable/pass_b" />
+
+                <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:hint="@string/new_password_hint"
+                    android:id="@+id/edit_new_password"
+                    android:inputType="textPassword"
+                    android:theme="@style/MyEditTextTheme" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:alpha="0.8"
+                android:layout_gravity="center_horizontal" >
+
+                <ImageView
+                    android:layout_width="48dp"
+                    android:layout_height="match_parent"
+                    android:id="@+id/imageView18"
+                    android:src="@drawable/pass_b" />
+
+                <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:inputType="textPassword"
+                    android:hint="@string/re_new_password_hint"
+                    android:id="@+id/edit_re_new_password"
+                    android:theme="@style/MyEditTextTheme" />
+            </LinearLayout>
+        </LinearLayout>
+
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -110,6 +208,6 @@
             android:layout_alignLeft="@+id/linearLayout10"
             android:layout_alignStart="@+id/linearLayout10"
             android:layout_marginTop="16dp" />
-    </RelativeLayout>
+    </LinearLayout>
 
 </RelativeLayout>

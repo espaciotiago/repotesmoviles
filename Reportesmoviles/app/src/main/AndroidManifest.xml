@@ -45,60 +45,48 @@
         <activity
             android:name=".AddNewReportActivity"
             android:label="@string/title_activity_add_new_report"
-            android:parentActivityName=".MenuActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.ufo.ufomobile.reportesmoviles.MenuActivity" />
-        </activity>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".ReportDescriptionActivity"
             android:label=""
-            android:parentActivityName=".MenuActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.ufo.ufomobile.reportesmoviles.MenuActivity" />
-        </activity>
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".NotificationsActivity"
             android:label="@string/title_activity_notifications"
-            android:theme="@style/AppTheme.NoActionBar">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.ufo.ufomobile.reportesmoviles.MenuActivity" />
-        </activity>
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".InitialActivity"
             android:label="@string/app_name"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".LoginActivity"
             android:label=""
-            android:theme="@style/AppTheme.NoActionBar">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.ufo.ufomobile.reportesmoviles.MenuActivity" />
-        </activity>
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".SignUpActivity"
             android:label=""
-            android:theme="@style/AppTheme.NoActionBar">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.ufo.ufomobile.reportesmoviles.LoginActivity" />
-        </activity>
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".ProfileActivity"
             android:label=""
-            android:parentActivityName=".MenuActivity"
-            android:theme="@style/AppTheme.NoActionBar">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.ufo.ufomobile.reportesmoviles.MenuActivity" />
-        </activity>
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".AboutActivity"
+            android:label="@string/title_activity_about"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ImageActivity"
+            android:label="@string/title_activity_image"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>

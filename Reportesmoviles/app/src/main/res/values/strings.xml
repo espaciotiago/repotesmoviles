@@ -96,7 +96,8 @@
         <item>Protección animal</item>
         <item>Seguridad</item>
         <item>Otro</item>
-    </string-array>v
+    </string-array>
+    v
 
     <string name="all">Todas</string>
     <string name="aqueduct">Acueducto y alcantarillado</string>
@@ -117,5 +118,6 @@
     <string name="title_activity_login">Inicio de sesion</string>
     <string name="title_activity_sign_up">SignUpActivity</string>
     <string name="title_activity_profile">ProfileActivity</string>
+    <string name="title_activity_maps">Map</string>
 
 </resources>

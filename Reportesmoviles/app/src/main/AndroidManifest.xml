@@ -99,6 +99,9 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.ufo.ufomobile.reportesmoviles.MenuActivity" />
         </activity>
+        <activity
+            android:name=".MapsActivity"
+            android:label="@string/title_activity_maps"></activity>
     </application>
 
 </manifest>

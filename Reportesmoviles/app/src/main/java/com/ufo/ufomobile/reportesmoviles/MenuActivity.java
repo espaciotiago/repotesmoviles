@@ -132,10 +132,10 @@ public class MenuActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.setItemIconTintList(null);
 
-        //View headerView = navigationView.inflateHeaderView(R.layout.nav_header_menu);
-        ImageView navHeaderImageView = (ImageView) navigationView.findViewById(R.id.nav_profile_pic);
-        TextView navHeaderName = (TextView) navigationView.findViewById(R.id.nav_name);
-        TextView navHeaderMail = (TextView) navigationView.findViewById(R.id.nav_mail);
+        View headerView = navigationView.getHeaderView(0);
+        ImageView navHeaderImageView = (ImageView) headerView.findViewById(R.id.nav_profile_pic);
+        TextView navHeaderName = (TextView) headerView.findViewById(R.id.nav_name);
+        TextView navHeaderMail = (TextView) headerView.findViewById(R.id.nav_mail);
 
         //Put the header information
         if(user.getImage()!=null && !user.getImage().equals("")){
@@ -152,7 +152,7 @@ public class MenuActivity extends AppCompatActivity
         //------------------------------------------------------------------------------------------
 
         permisosCamara();
-        permisosGPS();
+        //permisosGPS();
     }
 
     @Override
@@ -250,13 +250,28 @@ public class MenuActivity extends AppCompatActivity
     }
 
     private void permisosCamara() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA) &&
-                    ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.READ_CONTACTS)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            // Permission is not granted
+            // Should we show an explanation?
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.CAMERA)) {
+                // Show an explanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
             } else {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, Constants.PERMISO_CAMARA);
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, Constants.PERMISO_CAMARA);
+                // No explanation needed; request the permission
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.CAMERA,Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                        Constants.PERMISO_CAMARA);                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+                // app-defined int constant. The callback method gets the
+                // result of the request.
             }
+        } else {
+            // Permission has already been granted
         }
     }
 

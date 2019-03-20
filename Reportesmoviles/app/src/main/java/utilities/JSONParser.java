@@ -39,7 +39,6 @@ public class JSONParser {
      * @return
      */
     public JSONObject sendPOST(JSONObject data, String urlStr){
-
         try {
 
             URL url = new URL(urlStr);
@@ -61,7 +60,7 @@ public class JSONParser {
             InputStream is = httpConn.getInputStream();
             String parsedString = Constants.convertinputStreamToString(is);
 
-            Log.d("Stream",parsedString);
+            Log.e("Stream",parsedString);
             JSONObject jsnobject = new JSONObject(parsedString);
 
             return jsnobject;

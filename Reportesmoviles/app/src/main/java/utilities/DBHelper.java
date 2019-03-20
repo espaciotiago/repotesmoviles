@@ -96,16 +96,27 @@ public class DBHelper extends SQLiteOpenHelper {
     }
 
     //Update a user
-    public void updateUser(String name, String idNum,String phone,String place,String picture,String mail){
+    public void updateUser(String name, String idNum,String phone,String picture,String mail,String password){
 
         SQLiteDatabase db = this.getReadableDatabase();
         ContentValues values = new ContentValues();
-        values.put("name", name);
-        values.put("id", idNum);
-        values.put("phone", phone);
-        values.put("town", place);
-        values.put("image", picture);
-        db.update(TABLE_USER, values, "mail = ?", new String[]{mail});
+        if(name!=null && !name.equals("null") && !name.equals("")) {
+            values.put("name", name);
+        }
+        if(mail!=null && !mail.equals("null") && !mail.equals("")) {
+            values.put("mail", mail);
+        }
+        if(phone!=null && !phone.equals("null") && !phone.equals("")){
+            values.put("phone", phone);
+        }
+        if(picture!=null && !picture.equals("null") && !picture.equals("")) {
+            values.put("image", picture);
+        }
+        if(password!=null && !password.equals("null") && !password.equals("")){
+            Log.e("Pas upd","in" + " " + password);
+            values.put("password", password);
+        }
+        db.update(TABLE_USER, values, "id = ?", new String[]{idNum});
     }
 
     //Delete user

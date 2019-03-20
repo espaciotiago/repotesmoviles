@@ -11,21 +11,26 @@ public class Report implements Serializable{
     public final static String IN_PROCESS="En tramite";
     public final static String SOLVED="Solucionado";
 
-    private String id,title,description,address,status,category,date;
+    private String id,idUsuario,title,description,address,status,category,date;
     private int supports;
+    private int comments;
+    private int suporting;
     private double latitude,longitude;
     private ArrayList<String> images;
 
-    public Report(String id, String title, String description,
-                  String address, double latitude,int supports,
+    public Report(String id, String idUsuario,String title, String description,
+                  String address, double latitude,int supports,int comments,int suporting,
                   double longitude, String status, String category,String date,ArrayList<String>  images) {
         this.id = id;
+        this.idUsuario = idUsuario;
         this.title = title;
         this.description = description;
         this.address = address;
         this.latitude = latitude;
         this.longitude = longitude;
         this.supports = supports;
+        this.suporting = suporting;
+        this.comments = comments;
         this.status = status;
         this.images = images;
         this.category = category;
@@ -38,6 +43,14 @@ public class Report implements Serializable{
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getIdUsuario() {
+        return idUsuario;
+    }
+
+    public void setIdUsuario(String idUsuario) {
+        this.idUsuario = idUsuario;
     }
 
     public String getTitle() {
@@ -118,5 +131,21 @@ public class Report implements Serializable{
 
     public void setDate(String date) {
         this.date = date;
+    }
+
+    public int getComments() {
+        return comments;
+    }
+
+    public void setComments(int comments) {
+        this.comments = comments;
+    }
+
+    public int getSuporting() {
+        return suporting;
+    }
+
+    public void setSuporting(int suporting) {
+        this.suporting = suporting;
     }
 }

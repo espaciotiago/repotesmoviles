@@ -1,11 +1,13 @@
 package com.ufo.ufomobile.reportesmoviles;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
@@ -20,6 +22,7 @@ import android.text.method.ScrollingMovementMethod;
 import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,6 +34,10 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.text.DateFormat;
@@ -38,16 +45,20 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 import utilities.Constants;
+import utilities.DBHelper;
+import utilities.JSONParser;
 import utilities.Report;
+import utilities.User;
 
 public class AddNewReportActivity extends AppCompatActivity implements AddressPickerDialogFragment.OnaAddSelected {
 
-    private int categoryResource;
-    private double latitude,longitude;
-
+    /**
+     * UI ELEMENTS
+     */
     private ImageView categoryImg;
     private ImageButton addImage;
     private EditText title,description,address;
@@ -55,13 +66,23 @@ public class AddNewReportActivity extends AppCompatActivity implements AddressPi
     private ScrollView scrollView;
     private ImageButton mapview;
     private String categoryName;
-    RecyclerView myList;
-    Recycler_View_Adapter adapter;
-    List<Bitmap> data;
-    ArrayList<String> images = new ArrayList<String>();
-    ArrayList<String> imagesName = new ArrayList<String>();
+    private RecyclerView myList;
+    private Recycler_View_Adapter adapter;
 
-    int total_imgs;
+    /**
+     * LOGICAL ELEMENTS
+     */
+    private int categoryResource;
+    private double latitude,longitude;
+    private List<Bitmap> data;
+    private ArrayList<String> images = new ArrayList<String>();
+    private ArrayList<String> imagesName = new ArrayList<String>();
+    private int total_imgs;
+    private DBHelper db;
+    private User user;
+    ProgressDialog progressBar;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,6 +90,10 @@ public class AddNewReportActivity extends AppCompatActivity implements AddressPi
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        //Database ---------------------------------------------------------------------------------
+        db=new DBHelper(this);
+        user = db.userExists();
 
         categoryName=getIntent().getStringExtra("category_name");
 
@@ -146,20 +171,14 @@ public class AddNewReportActivity extends AppCompatActivity implements AddressPi
                 String date = df.format(Calendar.getInstance().getTime());
 
 
-                //Populate the array of string images
-                for(int i =0;i<data.size();i++){
-                    Log.d("NAME IMAGE",imagesName.get(i));
-                    Log.d("STRING IMAGE",images.get(i));
-                }
-
-
                 if(!tit.equals("") && !desc.equals("") && !addr.equals("")){
                     //Creates the new report
-                    Report report = new Report("00",tit,desc,addr,
-                            latitude,0,longitude,Report.PUBLISHED,categoryName,date,images);
-                    //TODO Enviar reporte
-                    Toast.makeText(getApplicationContext(),
-                            data.size()+"",Toast.LENGTH_SHORT).show();
+                    Report report = new Report("00",user.getId(),tit,desc,addr,
+                            latitude,0,0,0,longitude,Report.PUBLISHED,categoryName,date,imagesName);
+                    JSONObject reportJson = createReportJson(report);
+                    JSONObject imagesJson = createImagesJson();
+
+                    new SendReporAsyncTask(reportJson,imagesJson,Constants.URL_CREATE_REPORT,AddNewReportActivity.this).execute();
                 }else {
                     Toast.makeText(getApplicationContext(),
                             getResources().getString(R.string.incomplete_info_error),Toast.LENGTH_SHORT).show();
@@ -171,6 +190,92 @@ public class AddNewReportActivity extends AppCompatActivity implements AddressPi
         FragmentManager fm = getSupportFragmentManager();
         AddressPickerDialogFragment dialog = AddressPickerDialogFragment.newInstance(categoryResource);
         dialog.show(fm, "dialog");
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        if(id == android.R.id.home){
+            onBackPressed();
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * Prepare the info to send
+     * @param report
+     * @return
+     */
+    private JSONObject createReportJson(Report report){
+        HashMap<String,String> reportmap = new HashMap<>();
+        ArrayList<HashMap<String,String>> imagesmap = new ArrayList();
+        HashMap<String,HashMap<String,String>> map = new HashMap<>();
+
+        //Prepare the info for the report
+        reportmap.put(Constants.TITLE_EXTRA,report.getTitle());
+        reportmap.put(Constants.DESCRIPTION_EXTRA,report.getDescription());
+        reportmap.put(Constants.CATEGORY_EXTRA,report.getCategory());
+        reportmap.put(Constants.ADDRESS_EXTRA,report.getAddress());
+        reportmap.put(Constants.LONGITUDE_EXTRA,report.getLongitude()+"");
+        reportmap.put(Constants.LATITUDE_EXTRA,report.getLatitude()+"");
+        reportmap.put(Constants.USER_EXTRA,user.getId());
+
+        //Prepare the info for the images (names)
+        for(int i =0; i < report.getImages().size();i++){
+            HashMap<String,String> auxMap = new HashMap<>();
+            String image = report.getImages().get(i);
+            auxMap.put(Constants.IMAGE_EXTRA,image);
+            imagesmap.add(auxMap);
+        }
+
+        map.put(Constants.REPORT_EXTRA,reportmap);
+
+        JSONObject jsonObject = new JSONObject(map);
+        JSONArray jsonArray = new JSONArray(imagesmap);
+        try{
+            jsonObject.put(Constants.IMAGES_REPORT_EXTRA,jsonArray);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        Log.d("Json report",jsonObject.toString());
+        return jsonObject;
+    }
+
+    /**
+     * Prepares the info withe the images to send
+     * @return
+     */
+    private JSONObject createImagesJson(){
+        if(!imagesName.isEmpty()) {
+        ArrayList<HashMap<String,String>> imagesmap = new ArrayList<>();
+
+        //Prepare the info with the base64 encoded images
+            for (int i = 0; i < imagesName.size(); i++) {
+                HashMap<String, String> auxMap = new HashMap<>();
+                String imageName = imagesName.get(i);
+                String image = images.get(i);
+                auxMap.put(Constants.NAME_EXTRA, imageName);
+                auxMap.put(Constants.IMAGE_EXTRA, image);
+                imagesmap.add(auxMap);
+            }
+
+            JSONObject jsonObject = new JSONObject();
+            JSONArray jsonArray = new JSONArray(imagesmap);
+            try {
+                jsonObject.put(Constants.IMAGES_REPORT_EXTRA, jsonArray);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            Log.d("Json report images", jsonObject.toString());
+            return jsonObject;
+        }else{
+            return null;
+        }
     }
 
     /**
@@ -192,8 +297,8 @@ public class AddNewReportActivity extends AppCompatActivity implements AddressPi
                         Bitmap thumbImage = ThumbnailUtils.extractThumbnail(bp,w,h);
                         adapter.insert(adapter.getItemCount(), thumbImage);
                         //myList.scrollToPosition(adapter.getItemCount());
-                        // TODO: 15/11/16 agregar imagen a arreglo de imagenes
                         //data.add(bp);
+                        images.add(Constants.getStringImage(bp));
                         total_imgs++;
                     }catch (Exception e){
                         e.printStackTrace();
@@ -216,18 +321,17 @@ public class AddNewReportActivity extends AppCompatActivity implements AddressPi
         }
     }
 
+    /**
+     *
+     * @param c
+     * @param uri
+     * @return
+     * @throws FileNotFoundException
+     */
     public static Bitmap decodeUri(Context c, Uri uri)
             throws FileNotFoundException {
         BitmapFactory.Options o = new BitmapFactory.Options();
         return BitmapFactory.decodeStream(c.getContentResolver().openInputStream(uri), null, o);
-    }
-
-    public String getStringImage(Bitmap bmp){
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bmp.compress(Bitmap.CompressFormat.JPEG, 30, baos);
-        byte[] imageBytes = baos.toByteArray();
-        String encodedImage = Base64.encodeToString(imageBytes, Base64.DEFAULT);
-        return encodedImage;
     }
 
     @Override
@@ -315,9 +419,7 @@ public class AddNewReportActivity extends AppCompatActivity implements AddressPi
 
         // Insert a new item to the RecyclerView on a predefined position
         public void insert(int position, Bitmap data) {
-            // TODO: 15/11/16 agregar imagen a arreglo de imagenes
             list.add(position, data);
-            images.add(Constants.getStringImage(data));
             imagesName.add(Constants.giverImageName(Constants.IMG_CONS_REP));
             notifyItemInserted(position);
         }
@@ -325,7 +427,7 @@ public class AddNewReportActivity extends AppCompatActivity implements AddressPi
         // Remove a RecyclerView item containing a specified Data object
         public void remove(int position) {
             //int position = list.indexOf(data);
-            // TODO: 15/11/16 elimiar imagen de arreglo de imagenes
+            // TODO: 15/11/16 elimia raro
             Log.d("POS DEL",position+"");
             total_imgs--;
             list.remove(position);
@@ -350,5 +452,163 @@ public class AddNewReportActivity extends AppCompatActivity implements AddressPi
     }
 
     //----------------------------------------------------------------------------------------------
+
+    /**---------------------------------------------------------------------------------------------
+     * ASYNC TASK: Send data to the server
+     *----------------------------------------------------------------------------------------------
+     */
+
+    public class SendReporAsyncTask extends AsyncTask<Void, Void, JSONObject> {
+        /**
+         * Params
+         */
+        private JSONObject data;
+        private JSONObject dataImages;
+        private String url;
+        private Context context;
+        private JSONParser connectionHelper;
+
+        /**
+         *
+         * @param data
+         * @param url
+         * @param context
+         */
+        public SendReporAsyncTask(JSONObject data,JSONObject dataImages,String url,Context context){
+            this.data = data;
+            this.dataImages = dataImages;
+            this.url = url;
+            this.context = context;
+            connectionHelper = new JSONParser(context);
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            progressBar = new ProgressDialog(context);
+            progressBar.setCancelable(true);
+            progressBar.setMessage(context.getString(R.string.sending_data));
+            progressBar.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            progressBar.show();
+        }
+
+        @Override
+        protected JSONObject doInBackground(Void... params) {
+            JSONObject response;
+            response = connectionHelper.sendPOST(data,url);
+            return response;
+        }
+
+        @Override
+        protected void onPostExecute(JSONObject jsonObject) {
+            super.onPostExecute(jsonObject);
+
+            if(jsonObject!=null) {
+                Log.d("JSON RESPONSE",jsonObject.toString());
+                try {
+                    int successCode = jsonObject.getInt(Constants.STATUS_EXTRA);
+                    if(successCode==Constants.SUCCESS_CODE) {
+                        //Show the message
+                        String errorMessage = jsonObject.getString(Constants.MESSAGE_EXTRA);
+                        Toast.makeText(AddNewReportActivity.this,errorMessage,Toast.LENGTH_SHORT).show();
+
+                        if(dataImages!=null){
+                            //Send images if exist
+                            new SendImagesAsyncTask(dataImages,Constants.URL_CREATE_IMAGES_REPORT,context).execute();
+                        }else {
+                            progressBar.dismiss();
+                            //Go back to Menu
+                            Intent goToMenu = new Intent(AddNewReportActivity.this,MenuActivity.class);
+                            startActivity(goToMenu);
+                            finish();
+                        }
+
+                    }else {
+                        // Show the error message
+                        String errorMessage = jsonObject.getString(Constants.MESSAGE_EXTRA);
+                        Toast.makeText(AddNewReportActivity.this,errorMessage,Toast.LENGTH_SHORT).show();
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }else {
+                // Show the error message
+                Toast.makeText(AddNewReportActivity.this,getString(R.string.bad_connection_error),Toast.LENGTH_LONG).show();
+            }
+            //progressBar.dismiss();
+        }
+    }
+
+    /**---------------------------------------------------------------------------------------------
+     * ASYNC TASK: Send images to the server
+     *----------------------------------------------------------------------------------------------
+     */
+
+    public class SendImagesAsyncTask extends AsyncTask<Void, Void, JSONObject> {
+        /**
+         * Params
+         */
+        private JSONObject data;
+        private String url;
+        private Context context;
+        private JSONParser connectionHelper;
+
+        /**
+         *
+         * @param data
+         * @param url
+         * @param context
+         */
+        public SendImagesAsyncTask(JSONObject data,String url,Context context){
+            this.data = data;
+            this.url = url;
+            this.context = context;
+            connectionHelper = new JSONParser(context);
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected JSONObject doInBackground(Void... params) {
+            JSONObject response;
+            response = connectionHelper.sendPOST(data,url);
+            return response;
+        }
+
+        @Override
+        protected void onPostExecute(JSONObject jsonObject) {
+            super.onPostExecute(jsonObject);
+            progressBar.dismiss();
+            if(jsonObject!=null) {
+                Log.d("JSON RESPONSE",jsonObject.toString());
+                try {
+                    int successCode = jsonObject.getInt(Constants.STATUS_EXTRA);
+                    if(successCode==Constants.SUCCESS_CODE) {
+                        //Show the message
+                        String errorMessage = jsonObject.getString(Constants.MESSAGE_EXTRA);
+                        Toast.makeText(AddNewReportActivity.this,errorMessage,Toast.LENGTH_SHORT).show();
+
+                        //Go back to Menu
+                        Intent goToMenu = new Intent(AddNewReportActivity.this,MenuActivity.class);
+                        goToMenu.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        startActivity(goToMenu);
+                        finish();
+                    }else {
+                        // Show the error message
+                        String errorMessage = jsonObject.getString(Constants.MESSAGE_EXTRA);
+                        Toast.makeText(AddNewReportActivity.this,errorMessage,Toast.LENGTH_SHORT).show();
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }else {
+                // Show the error message
+                Toast.makeText(AddNewReportActivity.this,getString(R.string.bad_connection_error),Toast.LENGTH_LONG).show();
+            }
+        }
+    }
 
 }

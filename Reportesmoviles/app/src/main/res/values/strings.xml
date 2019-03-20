@@ -20,7 +20,8 @@
     <string name="address_hint">Dirección</string>
     <string name="point_hint">Punto de referencia</string>
     <string name="add_image_hint">Subir Foto</string>
-    <string name="related_images">IMAGENES RELACIONADAS</string>
+    <string name="related_images">Imágenes</string>
+    <string name="location">Ubicación</string>
     <string name="send">ENVIAR REPORTE</string>
     <string name="sended_at">ENVIADO:</string>
     <string name="report_number">N° de reporte: </string>
@@ -42,7 +43,10 @@
 
     <string name="mail_hint">Correo electronico</string>
     <string name="password_hint">Contraseña</string>
+    <string name="new_password_hint">Nueva contraseña</string>
     <string name="re_password_hint">Repita la contraseña</string>
+    <string name="re_new_password_hint">Repita la nueva contraseña</string>
+    <string name="restore_password">Restablecer contraseña</string>
     <string name="name_hint">Nombre completo</string>
     <string name="phone_hint">Teléfono</string>
     <string name="id_hint">Número de identificación</string>
@@ -75,18 +79,19 @@
     <!--
     Report categories
     -->
+    <!-- Report categories ids -->
     <string-array name="categories">
-        <item>Acueducto y alcantarillado</item>
-        <item>Recolección de basuras</item>
-        <item>Semaforización y Señalización</item>
-        <item>Espacio público</item>
-        <item>Infraestructura y vias</item>
-        <item>Protección animal</item>
-        <item>Seguridad</item>
-        <item>Otro</item>
+        <item>AA</item>
+        <item>RB</item>
+        <item>SS</item>
+        <item>EP</item>
+        <item>IV</item>
+        <item>PA</item>
+        <item>SE</item>
+        <item>OT</item>
     </string-array>
 
-    <!-- Report categories ids -->
+    <!-- Report categories strs -->
     <string-array name="categoriesStr">
         <item>Acueducto y alcantarillado</item>
         <item>Recolección de basuras</item>
@@ -97,7 +102,15 @@
         <item>Seguridad</item>
         <item>Otro</item>
     </string-array>
-    v
+
+    <!--
+    Report status
+    -->
+    <string-array name="statusIds">
+        <item>P</item>
+        <item>T</item>
+        <item>>S</item>
+    </string-array>
 
     <string name="all">Todas</string>
     <string name="aqueduct">Acueducto y alcantarillado</string>
@@ -111,6 +124,8 @@
     <string name="close">Cerrar Sesion</string>
     <string name="about">Acerca de</string>
 
+    <string name="suporting">Apoyando</string>
+
     <string name="title_activity_add_new_report">Añade tu reporte</string>
     <string name="title_activity_report_description">ReportDescriptionActivity</string>
     <string name="title_activity_notifications">Mis reportes</string>
@@ -119,5 +134,7 @@
     <string name="title_activity_sign_up">SignUpActivity</string>
     <string name="title_activity_profile">ProfileActivity</string>
     <string name="title_activity_maps">Map</string>
+    <string name="title_activity_about">Acerca de</string>
+    <string name="title_activity_image"></string>
 
 </resources>

@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
@@ -65,16 +66,17 @@ public class CategorySelectionDialogFragment extends DialogFragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        String[] categoriesStr = getResources().getStringArray(R.array.categories);
+        String[] categoriesIds = getResources().getStringArray(R.array.categories);
+        String[] categoriesStr = getResources().getStringArray(R.array.categoriesStr);
         categoryList=new ArrayList<Category>();
-        categoryList.add(new Category(categoriesStr[0],R.drawable.ic_marker_water));
-        categoryList.add(new Category(categoriesStr[1],R.drawable.ic_marker_trash));
-        categoryList.add(new Category(categoriesStr[2],R.drawable.ic_marker_traffic));
-        categoryList.add(new Category(categoriesStr[3],R.drawable.ic_marker_public));
-        categoryList.add(new Category(categoriesStr[4],R.drawable.ic_marker_road));
-        categoryList.add(new Category(categoriesStr[5],R.drawable.ic_marker_animal));
-        categoryList.add(new Category(categoriesStr[6],R.drawable.ic_marker_police));
-        categoryList.add(new Category(categoriesStr[7],R.drawable.ic_marker_other));
+        categoryList.add(new Category(categoriesStr[0],categoriesIds[0],R.drawable.ic_marker_water));
+        categoryList.add(new Category(categoriesStr[1],categoriesIds[1],R.drawable.ic_marker_trash));
+        categoryList.add(new Category(categoriesStr[2],categoriesIds[2],R.drawable.ic_marker_traffic));
+        categoryList.add(new Category(categoriesStr[3],categoriesIds[3],R.drawable.ic_marker_public));
+        categoryList.add(new Category(categoriesStr[4],categoriesIds[4],R.drawable.ic_marker_road));
+        categoryList.add(new Category(categoriesStr[5],categoriesIds[5],R.drawable.ic_marker_animal));
+        categoryList.add(new Category(categoriesStr[6],categoriesIds[6],R.drawable.ic_marker_police));
+        categoryList.add(new Category(categoriesStr[7],categoriesIds[7],R.drawable.ic_marker_other));
 
         categories=(ListView)view.findViewById(R.id.categories);
         categories.setAdapter(new ListAdapter(getActivity(), categoryList));
@@ -83,12 +85,13 @@ public class CategorySelectionDialogFragment extends DialogFragment {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Category cat = categoryList.get(i);
-                String name=cat.getName();
+                String name=cat.getId();
                 int resource=cat.getResource();
                 mListener.onArticleSelectedListener(resource,name);
                 dismiss();
             }
         });
+
         getDialog().getWindow().setSoftInputMode(
                 WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
     }
@@ -100,6 +103,15 @@ public class CategorySelectionDialogFragment extends DialogFragment {
             mListener = (OnaAddSelected) activity;
         } catch (ClassCastException e) {
             throw new ClassCastException(activity.toString() + " must implement OnArticleSelectedListener");
+        }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        Dialog dialog = getDialog();
+        if (dialog != null) {
+            dialog.getWindow().setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         }
     }
 

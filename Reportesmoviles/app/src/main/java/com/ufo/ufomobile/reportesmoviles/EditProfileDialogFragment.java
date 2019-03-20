@@ -33,30 +33,33 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 
+import utilities.Category;
+
 /**
  * Created by Tiago on 15/08/16.
  */
 public class EditProfileDialogFragment extends DialogFragment {
     private int PICK_IMAGE_REQUEST = 1;
 
-    private String actName,actIdNumber,actPhone,actPicture,newPicture;
-    private EditText name,phone;
+    private String actName,actIdNumber,actPhone,actPicture,newPicture,oldPassword;
+    private EditText name,phone,oldPassTxt,newPassTxt,renewPassTxt;
     private ImageView picture;
     private Button done;
     OnaEditProfileSelected mListener;
     private Bitmap bitmap;
     private Uri filePath;
     private LruCache<String, Bitmap> mMemoryCache;
+    private boolean isExpanded;
 
     public interface OnaEditProfileSelected {
-        public void onEditProfileSelectedListener(String name,String idNum,String phone,String picture);
+        public void onEditProfileSelectedListener(String name,String idNum,String phone,String picture,String newPassword);
     }
 
     public EditProfileDialogFragment(){
 
     }
 
-    public static EditProfileDialogFragment newInstance(String name,String idNum,String phone, String picture){
+    public static EditProfileDialogFragment newInstance(String name,String idNum,String phone, String picture,String password){
         EditProfileDialogFragment f = new EditProfileDialogFragment();
 
         // Supply num input as an argument.
@@ -65,6 +68,7 @@ public class EditProfileDialogFragment extends DialogFragment {
         args.putString("idNum",idNum);
         args.putString("phone",phone);
         args.putString("picture",picture);
+        args.putString("password",password);
         f.setArguments(args);
         return f;
     }
@@ -88,27 +92,70 @@ public class EditProfileDialogFragment extends DialogFragment {
         actIdNumber=getArguments().getString("idNum");
         actPhone=getArguments().getString("phone");
         actPicture=getArguments().getString("picture");
-        newPicture=actPicture;
+        oldPassword=getArguments().getString("password");
         //------------------------------------------------------------------------------------------
         name=(EditText)view.findViewById(R.id.name);
         phone=(EditText)view.findViewById(R.id.phone);
         picture=(ImageView)view.findViewById(R.id.pic);
+        oldPassTxt=(EditText)view.findViewById(R.id.edit_password);
+        newPassTxt=(EditText)view.findViewById(R.id.edit_new_password);
+        renewPassTxt=(EditText)view.findViewById(R.id.edit_re_new_password);
+        View restoreLayoutBtn = (View) view.findViewById(R.id.restore_layout);
+        final View passwordLayout = (View) view.findViewById(R.id.password_layout);
+        final ImageView expandBtn = (ImageView) view.findViewById(R.id.expand_btn);
 
         name.setText(actName);
         phone.setText(actPhone);
 
         done=(Button)view.findViewById(R.id.done);
+
+        //Click on donde
         done.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String nam=name.getText().toString();
                 String pho=phone.getText().toString();
-                if(!nam.equals("") && !pho.equals("")) {
-                    mListener.onEditProfileSelectedListener(nam, actIdNumber, pho,newPicture);
-                    dismiss();
+                boolean cancel = false;
+                if(isExpanded) {
+                    //Update the password
+                    // TODO: 9/12/16
+                    String oldPass = oldPassTxt.getText().toString();
+                    String newPass = newPassTxt.getText().toString();
+                    String renewPass = renewPassTxt.getText().toString();
+
+                    if(!oldPass.equals("") && !newPass.equals("") && !renewPass.equals("")){
+                        boolean oldpassmatch = passMatch(oldPassword,oldPass);
+                        boolean newpassmatch = passMatch(newPass,renewPass);
+
+                        if(!oldpassmatch){
+                            cancel = true;
+                            oldPassTxt.setError(getString(R.string.no_match_password_error));
+                            oldPassTxt.requestFocus();
+                        }else if(!newpassmatch){
+                            cancel = true;
+                            newPassTxt.setError(getString(R.string.no_match_password_error));
+                            newPassTxt.requestFocus();
+                        }
+                    }else{
+                        cancel = true;
+                    }
+
+                    if (!nam.equals("") && !pho.equals("") && !cancel) {
+                        mListener.onEditProfileSelectedListener(nam, actIdNumber, pho, newPicture, newPass);
+                        dismiss();
+                    } else {
+                        Toast.makeText(getActivity(),
+                                getResources().getString(R.string.incomplete_info_error), Toast.LENGTH_SHORT).show();
+                    }
                 }else{
-                    Toast.makeText(getActivity(),
-                            getResources().getString(R.string.incomplete_info_error),Toast.LENGTH_SHORT).show();
+                    //Don't update the passwors
+                    if (!nam.equals("") && !pho.equals("")) {
+                        mListener.onEditProfileSelectedListener(nam, actIdNumber, pho, newPicture, null);
+                        dismiss();
+                    } else {
+                        Toast.makeText(getActivity(),
+                                getResources().getString(R.string.incomplete_info_error), Toast.LENGTH_SHORT).show();
+                    }
                 }
             }
         });
@@ -127,8 +174,35 @@ public class EditProfileDialogFragment extends DialogFragment {
             }
         });
 
+        passwordLayout.setVisibility(View.GONE);
+
+        //Click to expand
+        restoreLayoutBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(isExpanded){
+                    passwordLayout.setVisibility(View.GONE);
+                    isExpanded = false;
+                    expandBtn.setImageResource(R.drawable.ic_expand_more_white_48dp);
+                }else {
+                    passwordLayout.setVisibility(View.VISIBLE);
+                    isExpanded = true;
+                    expandBtn.setImageResource(R.drawable.ic_expand_less_blue_48dp);
+                }
+            }
+        });
+
         getDialog().getWindow().setSoftInputMode(
                 WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        Dialog dialog = getDialog();
+        if (dialog != null) {
+            dialog.getWindow().setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        }
     }
 
     @Override
@@ -141,6 +215,23 @@ public class EditProfileDialogFragment extends DialogFragment {
         }
     }
 
+    /**
+     * Verify the amtches between passwords
+     * @param pass1
+     * @param pass2
+     * @return
+     */
+    private boolean passMatch(String pass1,String pass2){
+        if(pass1.equals(pass2)){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+    /**
+     * Show the file chooser
+     */
     private void showFileChooser() {
         Intent intent = new Intent();
         intent.setType("image/*");
@@ -168,212 +259,16 @@ public class EditProfileDialogFragment extends DialogFragment {
         }
     }
 
+    /**
+     * Get the base64 image string
+     * @param bmp
+     * @return
+     */
     public String getStringImage(Bitmap bmp){
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         bmp.compress(Bitmap.CompressFormat.JPEG, 30, baos);
         byte[] imageBytes = baos.toByteArray();
         String encodedImage = Base64.encodeToString(imageBytes, Base64.DEFAULT);
         return encodedImage;
-    }
-
-
-    // proccess the image --------------------------------------------------------------------------
-    /**
-     * Agrega un bitmap al cache
-     * @param key
-     * @param bitmap
-     */
-    public void addBitmapToMemoryCache(String key, Bitmap bitmap) {
-        if (getBitmapFromMemCache(key) == null) {
-            mMemoryCache.put(key, bitmap);
-        }
-    }
-
-    /**
-     * obtiene un bitmap del cache
-     * @param key
-     * @return
-     */
-    public Bitmap getBitmapFromMemCache(String key) {
-        return mMemoryCache.get(key);
-    }
-
-    /**
-     * Execute the load of the image
-     * @param resId
-     * @param imageView
-     */
-    public void loadBitmap(int resId, ImageView imageView) {
-        if (cancelPotentialWork(resId, imageView)) {
-
-            final String imageKey = String.valueOf(resId);
-            final Bitmap bitmap = getBitmapFromMemCache(imageKey);
-
-            if (bitmap != null) {
-                BitmapDrawable ob = new BitmapDrawable(getActivity().getResources(),bitmap);
-                imageView.setBackground(ob);
-            }else {
-                Bitmap mPlaceHolderBitmap = Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888);
-                final BitmapWorkerTask task = new BitmapWorkerTask(imageView);
-                final AsyncDrawable asyncDrawable =
-                        new AsyncDrawable(getActivity().getResources(), mPlaceHolderBitmap, task);
-                imageView.setImageDrawable(asyncDrawable);
-                task.execute(resId);
-            }
-        }
-    }
-
-    /**
-     * Cancel the concurrency
-     * @param data
-     * @param imageView
-     * @return
-     */
-    public static boolean cancelPotentialWork(int data, ImageView imageView) {
-        final BitmapWorkerTask bitmapWorkerTask = getBitmapWorkerTask(imageView);
-
-        if (bitmapWorkerTask != null) {
-            final int bitmapData = bitmapWorkerTask.data;
-            // If bitmapData is not yet set or it differs from the new data
-            if (bitmapData == 0 || bitmapData != data) {
-                // Cancel previous task
-                bitmapWorkerTask.cancel(true);
-            } else {
-                // The same work is already in progress
-                return false;
-            }
-        }
-        // No task associated with the ImageView, or an existing task was cancelled
-        return true;
-    }
-
-    /**
-     *
-     * @param imageView
-     * @return
-     */
-    private static BitmapWorkerTask getBitmapWorkerTask(ImageView imageView) {
-        if (imageView != null) {
-            final Drawable drawable = imageView.getDrawable();
-            if (drawable instanceof AsyncDrawable) {
-                final AsyncDrawable asyncDrawable = (AsyncDrawable) drawable;
-                return asyncDrawable.getBitmapWorkerTask();
-            }
-        }
-        return null;
-    }
-    /**
-     *
-     * @param res
-     * @param resId
-     * @param reqWidth
-     * @param reqHeight
-     * @return
-     */
-    public static Bitmap decodeSampledBitmapFromResource(Resources res, int resId,
-                                                         int reqWidth, int reqHeight) {
-
-        // First decode with inJustDecodeBounds=true to check dimensions
-        final BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inJustDecodeBounds = true;
-        BitmapFactory.decodeResource(res, resId, options);
-        //byte[] decodedString = Base64.decode(user.getImage(), Base64.DEFAULT);
-        //BitmapFactory.decodeByteArray(null,0,0,options);
-
-        // Calculate inSampleSize
-        options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
-
-        // Decode bitmap with inSampleSize set
-        options.inJustDecodeBounds = false;
-        return BitmapFactory.decodeResource(res, resId, options);
-    }
-
-    /**
-     *
-     * @param options
-     * @param reqWidth
-     * @param reqHeight
-     * @return
-     */
-    public static int calculateInSampleSize(
-            BitmapFactory.Options options, int reqWidth, int reqHeight) {
-        // Raw height and width of image
-        final int height = options.outHeight;
-        final int width = options.outWidth;
-        int inSampleSize = 1;
-
-        if (height > reqHeight || width > reqWidth) {
-
-            final int halfHeight = height / 2;
-            final int halfWidth = width / 2;
-
-            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
-            // height and width larger than the requested height and width.
-            while ((halfHeight / inSampleSize) >= reqHeight
-                    && (halfWidth / inSampleSize) >= reqWidth) {
-                inSampleSize *= 2;
-            }
-        }
-
-        return inSampleSize;
-    }
-
-
-    /**
-     * PROCESING THE IMAGE
-     */
-    class BitmapWorkerTask extends AsyncTask<Integer, Void, Bitmap> {
-        private final WeakReference<ImageView> imageViewReference;
-        private int data = 0;
-
-        public BitmapWorkerTask(ImageView imageView) {
-            // Use a WeakReference to ensure the ImageView can be garbage collected
-            imageViewReference = new WeakReference<ImageView>(imageView);
-        }
-
-        // Decode image in background.
-        @Override
-        protected Bitmap doInBackground(Integer... params) {
-            data = params[0];
-            Bitmap bitmap = decodeSampledBitmapFromResource(getActivity().getResources(), data, 200, 200);
-            addBitmapToMemoryCache(String.valueOf(params[0]), bitmap);
-            return bitmap;
-        }
-
-        // Once complete, see if ImageView is still around and set bitmap.
-        @Override
-        protected void onPostExecute(Bitmap bitmap) {
-            if (isCancelled()) {
-                bitmap = null;
-            }
-
-            if (imageViewReference != null && bitmap != null) {
-                final ImageView imageView = imageViewReference.get();
-                final BitmapWorkerTask bitmapWorkerTask =
-                        getBitmapWorkerTask(imageView);
-                if (this == bitmapWorkerTask && imageView != null) {
-                    BitmapDrawable ob = new BitmapDrawable(getActivity().getResources(),bitmap);
-                    imageView.setBackground(ob);
-                }
-            }
-        }
-    }
-
-    /**
-     * HANDLE CONCURRENCY
-     */
-    static class AsyncDrawable extends BitmapDrawable {
-        private final WeakReference<BitmapWorkerTask> bitmapWorkerTaskReference;
-
-        public AsyncDrawable(Resources res, Bitmap bitmap,
-                             BitmapWorkerTask bitmapWorkerTask) {
-            super(res, bitmap);
-            bitmapWorkerTaskReference =
-                    new WeakReference<BitmapWorkerTask>(bitmapWorkerTask);
-        }
-
-        public BitmapWorkerTask getBitmapWorkerTask() {
-            return bitmapWorkerTaskReference.get();
-        }
     }
 }

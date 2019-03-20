@@ -3,7 +3,7 @@
     android:id="@+id/product_detail_main_content"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:apptools="http://schemas.android.com/tools"
+    android:fitsSystemWindows="true"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:focusableInTouchMode="true"
@@ -18,14 +18,23 @@
                 android:id="@+id/collapsingToolbarLayout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                app:layout_scrollFlags="scroll|exitUntilCollapsed">
+                app:contentScrim="?attr/colorPrimary"
+                app:layout_scrollFlags="scroll|exitUntilCollapsed"
+                app:expandedTitleTextAppearance="@style/TextAppearance.AppCompat.Title">
 
                 <ImageView
                     android:id="@+id/image_report"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:scaleType="centerCrop"
-                    android:src="@drawable/test_img"/>
+                    android:scaleType="centerCrop"/>
+
+                <ProgressBar
+                    style="?android:attr/progressBarStyleLarge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/loader2"
+                    android:layout_gravity="center_horizontal"
+                    android:indeterminate="false" />
 
                 <android.support.v7.widget.Toolbar
                     android:id="@+id/detail_toolbar"
@@ -79,8 +88,7 @@
             <LinearLayout
                 android:orientation="vertical"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="10dp">
+                android:layout_height="wrap_content">
 
                 <include layout="@layout/content_report_description" />
             </LinearLayout>
@@ -128,7 +136,7 @@
                         android:textAppearance="?android:attr/textAppearanceMedium"
                         android:text="@string/like"
                         android:textColor="@color/withe"
-                        android:id="@+id/textView6"
+                        android:id="@+id/supporting"
                         android:gravity="center"
                         android:layout_marginLeft="5dp" />
                 </LinearLayout>

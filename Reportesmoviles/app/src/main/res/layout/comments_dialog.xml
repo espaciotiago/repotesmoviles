@@ -42,10 +42,21 @@
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:id="@+id/btn_send"
-            android:src="@drawable/ic_menu_send"
+            android:src="@drawable/send_btn_selector"
             android:layout_alignParentTop="true"
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="false"/>
 
     </RelativeLayout>
+
+    <ProgressBar
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/loader"
+        android:layout_gravity="center_horizontal"
+        android:indeterminate="false"
+        android:layout_alignTop="@+id/comments_recyclerview"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="37dp" />
 </RelativeLayout>
